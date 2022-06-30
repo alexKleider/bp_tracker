@@ -21,16 +21,29 @@ from datetime import datetime
 import os.path
 
 def array_from_file(report_file):
+  """
+  Input is the report file: four values per line.
+  Output is a list of 4 tuples.
+  Tuples are: systolic, diastolic, pulse, time stamp.
+  """
   data = []
   with open(report_file, 'r') as file:
     for line in file:
       line.strip()
       datum = line.split()
       if len(datum) == 4:
-        data.append(datum)
+        data.append(tuple(datum))
   return data
  
 def report(report_data):
+# Suggest renaming 'highest_events_report'
+# Why include the latest date??
+# ..wouldn't one expect it to always be the last item?
+  """
+  Input is a list of 4 tuples.
+  Output is a 4 tuple, each member of which is
+  the highest of its category in the input.
+  """
   highest_systolic  = 0
   highest_diastolic = 0
   highest_pulse     = 0
@@ -51,7 +64,8 @@ def report(report_data):
       highest_pulse_event = datum
     if date > latest:
       latest_record = datum
-  return highest_systolic_event, highest_diastolic_event, highest_pulse_event, latest_record
+  return (highest_systolic_event, highest_diastolic_event,
+          highest_pulse_event, latest_record,)
 
 def print_report(highest_systolic_event, highest_diastolic_event, highest_pulse_event, latest_record):
   print("Highest Systolic: {}/{} {} {}".format(*highest_systolic_event))
@@ -61,6 +75,7 @@ def print_report(highest_systolic_event, highest_diastolic_event, highest_pulse_
 
 def list_collations(report_data):
   """ Takes a data set and returns a tuple of three lists. """
+  # a tuple (immutable) of lists (mutable)? Is that even possible??
   systolics   = []
   diastolics  = []
   pulses      = []
@@ -82,6 +97,30 @@ def list_high_low(l):
   """ Takes a numeric list and returns the highest and lowest entries. """
   return (min(l), max(l))
 
+def averages(data, n=None):
+    """
+    Input is a list of 4 tuples. (array_from_file output)
+    Result is a tuple of floats: averages of the
+    systoli, diastolic and pulse values.
+    If n is provided, it must be an integer representing how 
+    many of the last recorded values to include in the average.
+    """
+#   print("data are: {}".format(data))  # for debugging
+    if n:
+        d = data[-n:]
+    else:
+        d = data
+        n = len(d)
+    sys_sum = dia_sum = pul_sum = 0
+    for vals in d:
+        sys_sum += int(vals[0])
+        dia_sum += int(vals[1])
+        pul_sum += int(vals[2])
+    return sys_sum/n, dia_sum/n, pul_sum/n
+
+def display_averages(averages):
+    return ('{:.1f}/{:.1f} {:.1f}'
+            .format(*averages))
 
 if __name__ == '__main__':
     report_file = "data/bp_numbers.txt"
@@ -124,6 +163,11 @@ if __name__ == '__main__':
             list_average(diastolics),  
             list_high_low(diastolics)[0],
             list_high_low(diastolics)[1],
+          ))
+          print("Pulse: Average {}, Low {}, High {}".format(
+            list_average(pulses),  
+            list_high_low(pulses)[0],
+            list_high_low(pulses)[1],
           ))
         except Exception as e:
           print("Error processing report data", e)
