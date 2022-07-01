@@ -13,8 +13,10 @@
 #   Add statistical analysis for standard deviation.
 #   Report based on time of day (early, midmorning, afternoon, evening)
 #   (?) Add current distance from goal?
-#   Error checking for input. Three ints?
-#   Add tests.
+#   Error checking for input. Three ints? 
+##     -fails if incorrect number of arguments are given
+##     -so me thinks no need for this- error message is pretty good
+#   Add tests.  - have begun with testing averages func
 
 import argparse
 from datetime import datetime

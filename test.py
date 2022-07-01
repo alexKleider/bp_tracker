@@ -6,6 +6,7 @@ import unittest
 import bp_tracker
 
 infile = 'data/bp_numbers.txt'
+# We assume there is such a data file, the more entries the better.
 
 
 def incriment_by3values(sums, values):
@@ -34,10 +35,19 @@ class TestBpTracker(unittest.TestCase):
 
     def test_averaging(self):
         averages = collect_averages(infile)
-        print(averages)
+#       print(averages)
         self.assertEqual(tuple(averages),
                 bp_tracker.averages(
                     bp_tracker.array_from_file(infile))
+                )
+
+    def test_averaging_only_last_few(self):
+        for n in range(7):
+            averages = collect_averages(infile)[-7:]
+#           print(averages)
+            self.assertEqual(tuple(averages),
+                bp_tracker.averages(
+                    bp_tracker.array_from_file(infile)), n
                 )
 
 if __name__ == '__main__':
