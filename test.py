@@ -33,7 +33,9 @@ def collect_averages(infile):
 class TestBpTracker(unittest.TestCase):
 
     def test_averaging(self):
-        self.assertEqual(tuple(collect_averages(infile)),
+        averages = collect_averages(infile)
+        print(averages)
+        self.assertEqual(tuple(averages),
                 bp_tracker.averages(
                     bp_tracker.array_from_file(infile))
                 )

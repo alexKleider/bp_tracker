@@ -104,9 +104,15 @@ def averages(data, n=None):
     systoli, diastolic and pulse values.
     If n is provided, it must be an integer representing how 
     many of the last recorded values to include in the average.
+    If greater than number of values, it will be scaled down.
     """
-#   print("data are: {}".format(data))  # for debugging
+    l = len(data)
     if n:
+        if n < 0:
+            print("Number to consider can not be less than zero!")
+            assert False
+        l = len(data)
+        if n > l: n = l
         d = data[-n:]
     else:
         d = data
@@ -136,6 +142,12 @@ if __name__ == '__main__':
       help = "Report file (default data/bp_numbers.txt)",
       default = "data/bp_numbers.txt",
       )
+    parser.add_argument(
+      "-v", "--averages",
+      nargs=1,
+      help = "Report average values (default data/bp_numbers.txt)",
+      default = 0,
+      )
     args    = parser.parse_args()
 
     if args.file:
@@ -148,6 +160,11 @@ if __name__ == '__main__':
       this_report.append(timestamp) 
       with open(report_file, 'a') as file:
         file.write("{} {} {} {}\n".format(*this_report))
+    elif args.averages:
+        n = int(args.averages[0])
+        print("Averages are systolic " +
+                "{:.0f}, diastolic {:.0f} & pulse {:.0f}"
+                .format(*averages(array_from_file(report_file), n)))
     else: 
       # Default behavior is to report.
       if os.path.exists(report_file):
