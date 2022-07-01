@@ -99,7 +99,7 @@ def list_high_low(l):
 
 def averages(data, n=None):
     """
-    Input is a list of 4 tuples. (array_from_file output)
+    Input is a list of 4 tuples. (output of array_from_file func)
     Result is a tuple of floats: averages of the
     systoli, diastolic and pulse values.
     If n is provided, it must be an integer representing how 
