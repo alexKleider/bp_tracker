@@ -8,6 +8,7 @@ import bp_tracker
 infile = 'data/bp_numbers.txt'
 # We assume there is such a data file, the more entries the better.
 
+# Begin with two helper functions:
 
 def incriment_by3values(sums, values):
     """Note side effect on <sums>."""
@@ -41,6 +42,7 @@ class TestBpTracker(unittest.TestCase):
                     bp_tracker.array_from_file(infile))
                 )
 
+
     def test_averaging_only_last_few(self):
         for n in range(7):
             averages = collect_averages(infile)[-7:]
@@ -49,6 +51,7 @@ class TestBpTracker(unittest.TestCase):
                 bp_tracker.averages(
                     bp_tracker.array_from_file(infile)), n
                 )
+
 
 if __name__ == '__main__':
     unittest.main()

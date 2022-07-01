@@ -22,11 +22,14 @@ import argparse
 from datetime import datetime
 import os.path
 
+
 def array_from_file(report_file):
   """
-  Input is the report file: four values per line.
+  Input is the report file: four (string) values per line.[1]
   Output is a list of 4 tuples.
-  Tuples are: systolic, diastolic, pulse, time stamp.
+  Tuples are: systolic, diastolic, pulse, time stamp.[1]
+  [1] Each element is a string representation of a number:
+  first three are integers, last (the fourth) is a float.
   """
   data = []
   with open(report_file, 'r') as file:
@@ -37,6 +40,7 @@ def array_from_file(report_file):
         data.append(tuple(datum))
   return data
  
+
 def report(report_data):
 # Suggest renaming 'highest_events_report'
 # Why include the latest date??
@@ -69,11 +73,16 @@ def report(report_data):
   return (highest_systolic_event, highest_diastolic_event,
           highest_pulse_event, latest_record,)
 
-def print_report(highest_systolic_event, highest_diastolic_event, highest_pulse_event, latest_record):
+
+def print_report(highest_systolic_event,
+                highest_diastolic_event,
+                highest_pulse_event,
+                latest_record):
   print("Highest Systolic: {}/{} {} {}".format(*highest_systolic_event))
   print("Highest Diastolic: {}/{} {} {}".format(*highest_diastolic_event))
   print("Highest Pulse: {}/{} {} {}".format(*highest_pulse_event))
   print("Latest Record: {}/{} {} {}".format(*latest_record))
+
 
 def list_collations(report_data):
   """ Takes a data set and returns a tuple of three lists. """
@@ -95,9 +104,11 @@ def list_average(l):
   average = sum(l) // len(l)
   return average
 
+
 def list_high_low(l):
   """ Takes a numeric list and returns the highest and lowest entries. """
   return (min(l), max(l))
+
 
 def averages(data, n=None):
     """
@@ -126,9 +137,11 @@ def averages(data, n=None):
         pul_sum += int(vals[2])
     return sys_sum/n, dia_sum/n, pul_sum/n
 
+
 def display_averages(averages):
     return ('{:.1f}/{:.1f} {:.1f}'
             .format(*averages))
+
 
 if __name__ == '__main__':
     report_file = "data/bp_numbers.txt"
