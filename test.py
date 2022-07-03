@@ -10,8 +10,14 @@ infile = 'data/bp_numbers.txt'
 
 # Begin with two helper functions:
 
-def incriment_by3values(sums, values):
-    """Note side effect on <sums>."""
+def incriment_sums_by_values(sums, values):
+    """
+    <sums> is an iterable of running totals.
+    <values> is a same length iterable of values to be added to the
+    corresponding values in <sums>.
+    Note side effect on <sums>.
+    """
+    assert(len(sums) == len(values))
     for n in range(len(values)):
         sums[n] += values[n]
 
@@ -27,7 +33,7 @@ def collect_averages(infile):
         for line in stream:
             if line:
                 parts = [int(val) for val in line.split()[:3]]
-                incriment_by3values(totals, parts)
+                incriment_sums_by_values(totals, parts)
                 denominator += 1
     return [total/denominator for total in totals]  
 
