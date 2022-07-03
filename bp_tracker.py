@@ -158,10 +158,11 @@ if __name__ == '__main__':
       default = "data/bp_numbers.txt",
       )
     parser.add_argument(
+# How can I add a command line option without it having an argument??
       "-v", "--averages",
-      nargs=1,
-      help = "Report average values (default data/bp_numbers.txt)",
-      default = 0,
+#     nargs=1,
+      help = "Report average values.",
+#     default=None,
       )
     args    = parser.parse_args()
 
