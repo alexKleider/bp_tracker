@@ -160,9 +160,9 @@ if __name__ == '__main__':
     parser.add_argument(
 # How can I add a command line option without it having an argument??
       "-v", "--averages",
-#     nargs=1,
-      help = "Report average values.",
-#     default=None,
+      nargs=1,
+      help = "Report average of last n values, 0 for all",
+      default=0,
       )
     args    = parser.parse_args()
 
