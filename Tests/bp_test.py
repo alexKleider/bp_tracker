@@ -35,7 +35,7 @@ def collect_averages(infile):
         denominator = 0
         totals = [0, 0, 0]
         for line in stream:
-            if line:
+            if line and not line.startswith('#') :
                 parts = [int(val) for val in line.split()[:3]]
                 incriment_sums_by_values(totals, parts)
                 denominator += 1

@@ -23,6 +23,24 @@ from datetime import datetime
 import os.path
 
 
+def useful_lines(stream, comment="#"):
+    """
+    A generator which accepts a stream of lines (strings.)
+    Blank lines (or white space only) are ignored.
+    If <comment> resolves to true, lines beginning with <comment>
+    (after being stripped of leading spaces) are also ignored.
+    <comment> can be set to <None> if don't want this functionality.
+    Other lines are returned ("yield"ed) stripped of leading and
+    trailing white space.
+    """
+    for line in stream:
+        line = line.strip()
+        if comment and line.startswith(comment):
+            continue
+        if line:
+            yield line
+
+
 def array_from_file(report_file):
   """
   Input is the report file: four (string) values per line.[1]
@@ -32,12 +50,16 @@ def array_from_file(report_file):
   first three are integers, last (the fourth) is a float.
   """
   data = []
-  with open(report_file, 'r') as file:
-    for line in file:
-      line.strip()
+  with open(report_file, 'r') as stream:
+    for line in useful_lines(stream):
       datum = line.split()
       if len(datum) == 4:
         data.append(tuple(datum))
+      else:
+        # the following print statements are the closest we come to a
+        # test of this function.
+        print("Badly formated line found in input file:")
+        print('"{}"'.format(line))
   return data
  
 
@@ -45,6 +67,8 @@ def report(report_data):
 # Suggest renaming 'highest_events_report'
 # Why include the latest date??
 # ..wouldn't one expect it to always be the last item?
+# Also: now where in the code can I find a place where this
+# information is used.
   """
   Input is a list of 4 tuples.
   Output is a 4 tuple, each member of which is
@@ -78,6 +102,8 @@ def print_report(highest_systolic_event,
                 highest_diastolic_event,
                 highest_pulse_event,
                 latest_record):
+  # I'm curious why you include the latest record
+  # This function is not used anywhere in the code.
   print("Highest Systolic: {}/{} {} {}".format(*highest_systolic_event))
   print("Highest Diastolic: {}/{} {} {}".format(*highest_diastolic_event))
   print("Highest Pulse: {}/{} {} {}".format(*highest_pulse_event))
@@ -100,7 +126,10 @@ def list_collations(report_data):
 
 
 def list_average(l):
-  """ Takes a numeric list and returns an integer. """
+  """
+  Takes a numeric list and returns the average
+  expressed as an integer.
+  """
   average = sum(l) // len(l)
   return average
 
@@ -178,9 +207,13 @@ if __name__ == '__main__':
         file.write("{} {} {} {}\n".format(*this_report))
     elif args.averages:
         n = int(args.averages[0])
-        print("Averages are systolic " +
-                "{:.0f}, diastolic {:.0f} & pulse {:.0f}"
-                .format(*averages(array_from_file(report_file), n)))
+        data = array_from_file(report_file)
+        l = len(data)
+        if (n > l) or (n < 1) : n = l
+        print(
+            "Averages of last {} readings are ...\n".format(n) +
+            "systolic {:.0f}, diastolic {:.0f} & pulse {:.0f}"
+            .format(*averages(data, n)))
     else: 
       # Default behavior is to report.
       if os.path.exists(report_file):
