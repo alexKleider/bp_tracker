@@ -30,11 +30,10 @@ def collect_averages(infile):
     with open(infile, 'r') as stream:
         denominator = 0
         totals = [0, 0, 0]
-        for line in stream:
-            if line:
-                parts = [int(val) for val in line.split()[:3]]
-                incriment_sums_by_values(totals, parts)
-                denominator += 1
+        for line in bp_tracker.useful_lines(stream):
+            parts = [int(val) for val in line.split()[:3]]
+            incriment_sums_by_values(totals, parts)
+            denominator += 1
     return [total/denominator for total in totals]  
 
 
