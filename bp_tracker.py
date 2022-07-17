@@ -211,8 +211,10 @@ if __name__ == '__main__':
         l = len(data)
         if (n > l) or (n < 1) : n = l
         print(
-            "Averages of last {} readings are ...\n".format(n) +
-            "systolic {:.0f}, diastolic {:.0f} & pulse {:.0f}"
+            "Average valuess (sys/dia pulse)" +
+            "of last {} readings are ...\n"
+            .format(n) +
+            "{:.0f}/{:.0f}  {:.0f}"
             .format(*averages(data, n)))
     else: 
       # Default behavior is to report.
