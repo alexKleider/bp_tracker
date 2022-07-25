@@ -26,7 +26,7 @@ import os.path
 def useful_lines(stream, comment="#"):
     """
     A generator which accepts a stream of lines (strings.)
-    Blank lines (or white space only) are ignored.
+    Blank lines and leading and/or trailing white space are ignored.
     If <comment> resolves to true, lines beginning with <comment>
     (after being stripped of leading spaces) are also ignored.
     <comment> can be set to <None> if don't want this functionality.
@@ -67,12 +67,14 @@ def report(report_data):
 # Suggest renaming 'highest_events_report'
 # Why include the latest date??
 # ..wouldn't one expect it to always be the last item?
-# Also: now where in the code can I find a place where this
+# Also: no where in the code can I find a place where this
 # information is used.
   """
   Input is a list of 4 tuples.
   Output is a 4 tuple, each member of which is
   the highest of its category in the input.
+  Ordering function is based on int() for the first three
+  and float() for the last of each 4 tuple of input.
   """
   highest_systolic  = 0
   highest_diastolic = 0
@@ -168,12 +170,19 @@ def averages(data, n=None):
 
 
 def display_averages(averages):
+    """
+    Assumes want one decimal place.
+    # Might consider adding another (optional parameter: a 3 tuple)
+    # specifying number of decimal points to specify for each value. 
+    """
     return ('{:.1f}/{:.1f} {:.1f}'
             .format(*averages))
 
 
 if __name__ == '__main__':
     report_file = "data/bp_numbers.txt"
+    # Suggest using this as a default but allowing for an '-i' option
+    # to specify an input 'report_file'.
 
     parser = argparse.ArgumentParser()
     parser.add_argument(
