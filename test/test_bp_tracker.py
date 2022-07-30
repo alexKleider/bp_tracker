@@ -3,10 +3,8 @@
 # File tests.py
 
 import os
-import sys
 import unittest
 
-sys.path.insert(0, os.path.split(sys.path[0])[0])
 import bp_tracker
 
 infile = 'data/bp_numbers.txt'
@@ -14,7 +12,7 @@ infile = 'data/bp_numbers.txt'
 
 # Begin with two helper functions:
 
-def incriment_sums_by_values(sums, values):
+def increment_sums_by_values(sums, values):
     """
     <sums> is an iterable of running totals.
     <values> is a same length iterable of values to be added to the
@@ -37,7 +35,7 @@ def collect_averages(infile):
         for line in stream:
             if line and not line.startswith('#') :
                 parts = [int(val) for val in line.split()[:3]]
-                incriment_sums_by_values(totals, parts)
+                increment_sums_by_values(totals, parts)
                 denominator += 1
     return [total/denominator for total in totals]  
 
