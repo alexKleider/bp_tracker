@@ -198,6 +198,8 @@ if __name__ == '__main__':
 
     if args.file:
         report_file = args.file
+        print("Reassigned data file to '{}'."
+                .format(report_file))
 
     if args.add:
         # This format allows sequencing now and parsing later.
@@ -219,7 +221,9 @@ if __name__ == '__main__':
             .format(*averages(data, n)))
     else: 
         # Default behavior is to report.
+        print("...going to default behaviour...")
         if os.path.exists(report_file):
+            print("report_file ({}) exists".format(report_file))
             try:
                 report_data = array_from_file(report_file)
                 systolics, diastolics, pulses  = list_collations(report_data)
