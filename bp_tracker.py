@@ -15,6 +15,7 @@
 #   (?) Add current distance from goal?
 #   Add more tests.
 
+import sys
 import argparse
 from datetime import datetime
 import os.path
@@ -55,6 +56,9 @@ def array_from_file(report_file):
             else:
                 print("Badly formated line found in input file:")
                 print('"{}"'.format(line))
+#   print("Returning the following data:")
+#   print(data)
+#   print("...end of data")
     return data
  
 
@@ -212,6 +216,9 @@ if __name__ == '__main__':
         n = int(args.averages[0])
         data = array_from_file(report_file)
         l = len(data)
+        if l == 0:
+            print("No readings to report!")
+            sys.exit()
         if (n > l) or (n < 1) : n = l
         print(
             "Average valuess (sys/dia pulse)" +
@@ -221,11 +228,14 @@ if __name__ == '__main__':
             .format(*averages(data, n)))
     else: 
         # Default behavior is to report.
-        print("...going to default behaviour...")
+#       print("...going to default behaviour...")
         if os.path.exists(report_file):
-            print("report_file ({}) exists".format(report_file))
+#           print("report_file ({}) exists".format(report_file))
             try:
                 report_data = array_from_file(report_file)
+                if not len(report_data) > 0:
+                    print("No readings to report!")
+                    sys.exit()
                 systolics, diastolics, pulses  = list_collations(report_data)
                 print("Systolic: Average {}, Low {}, High {}".format(
                 list_average(systolics),  
@@ -242,7 +252,9 @@ if __name__ == '__main__':
                 list_high_low(pulses)[0],
                 list_high_low(pulses)[1],
                 ))
-            except Exception as e:
+            except Exception as e:  # !!! Against all advice I've read!
+                ##  !! Leam: we need to NOT catch all exceptions!
+                ##  !! .. a big "NO NO" from everything I've read
                 print("Error processing report data", e)
         else:
             print("Cannot find ", report_file)
