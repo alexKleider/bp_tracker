@@ -9,6 +9,8 @@ import bp_tracker
 
 infile = 'data/bp_numbers.txt'
 # We assume there is such a data file, the more entries the better.
+non_existent_file = "ghostfile"  # our nonexistent file
+empty_file = "empty"  # our empty file
 
 # Begin with two helper functions:
 
@@ -60,6 +62,20 @@ class TestBpTracker(unittest.TestCase):
                     bp_tracker.array_from_file(infile)), n
                 )
 
+
+    # write tests for no, empty, good data & bad data files:
+
+    def test_no_file(self):
+        pass
+
+    def test_empty_file(self):
+        pass
+
+    def test_good_data_file(self):
+        pass
+
+    def test_bad_data_file(self):
+        pass
 
 if __name__ == '__main__':
     unittest.main()

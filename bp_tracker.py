@@ -20,6 +20,19 @@ import argparse
 from datetime import datetime
 import os.path
 
+# Making this a global constant for now:
+# in future will probably read a config file to set this global..
+DEFAULT_REPORT_FILE = "data/bp_numbers.txt"
+
+
+def check_validity_of_data_file(file):
+    if not os.path.exists(file):
+        print("Cannot find ", file)
+        sys.exit()
+    elif os.path.getsize(file) == 0:
+        return 'empty'
+    else:
+        return 'valid'
 
 def useful_lines(stream, comment="#"):
     """
@@ -48,6 +61,7 @@ def array_from_file(report_file):
     first three are integers, last (the fourth) is a float.
     """
     data = []
+    #! replace with clause with store_report function
     with open(report_file, 'r') as stream:
         for line in useful_lines(stream):
             datum = line.split()
@@ -179,8 +193,9 @@ def display_averages(averages):
 
 
 if __name__ == '__main__':
-    report_file = "data/bp_numbers.txt"
+    report_file = DEFAULT_REPORT_FILE 
 
+    # argparser:
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "-a", "--add",
@@ -190,7 +205,6 @@ if __name__ == '__main__':
     parser.add_argument(
         "-f", "--file",
         help = "Report file (default data/bp_numbers.txt)",
-        default = "data/bp_numbers.txt",
         )
     parser.add_argument(
         "-v", "--averages",
@@ -200,7 +214,16 @@ if __name__ == '__main__':
         )
     args    = parser.parse_args()
 
+    # deal with arguments collected by argparser:
+    # so far we have only 'add', 'file' and 'averages'
+    ## Modify data file prn and ..
+    ## Notify user which data file is being used:
     if args.file:
+        # Dealing with data file.
+        # Expect in future this option will mofify the
+        # config file and exit.  i.e. reset the data file
+        # For the time being it provides a way of reading or
+        # adding data from/to a non default file.
         report_file = args.file
         print("Reassigned data file to '{}'."
                 .format(report_file))
@@ -208,58 +231,71 @@ if __name__ == '__main__':
         print("Using '{}' as data file."
             .format(report_file))
 
+    # Me thinks this is the time to check that the file
+    # exists and contains valid data.
+    validity = check_validity_of_data_file(report_file)
+
+    # User wants to add data:
     if args.add:
         # This format allows sequencing now and parsing later.
         timestamp   = datetime.now().strftime("%Y%m%d.%H%M")
         this_report = args.add
         this_report.append(timestamp) 
+        #! replace next two lines with store_report function
         with open(report_file, 'a') as file:
             file.write("{} {} {} {}\n".format(*this_report))
+    # User wants averages displayed:
     elif args.averages:
+        if validity == "empty":
+            print("No data in specified file")
+            sys.exit()
         n = int(args.averages[0])
         data = array_from_file(report_file)
         l = len(data)
+        redacted = """
         if l == 0:
             print("No readings to report!")
             sys.exit()
+        """  # already checked that file isn't empty!
         if (n > l) or (n < 1) : n = l
+        try:
+            avgs = averages(data, n)
+        except ValueError:
+            print("Bad data found in file")
+            sys.exit()
         print(
             "Average valuess (sys/dia pulse)" +
             "of last {} readings are ...\n"
             .format(n) +
             "{:.0f}/{:.0f}  {:.0f}"
-            .format(*averages(data, n)))
+            .format(*avgs))
     else: 
         # Default behavior is to report.
-#       print("...going to default behaviour...")
-        if os.path.exists(report_file):
-#           print("report_file ({}) exists".format(report_file))
+    #       print("...going to default behaviour...")
+        if validity == empty:
+            print("No data in specified file")
+            sys.exit()
             try:
                 report_data = array_from_file(report_file)
-                if not len(report_data) > 0:
-                    print("No readings to report!")
-                    sys.exit()
-                systolics, diastolics, pulses  = list_collations(report_data)
-                print("Systolic: Average {}, Low {}, High {}".format(
-                list_average(systolics),  
-                list_high_low(systolics)[0],
-                list_high_low(systolics)[1],
-                ))
-                print("Diastolic: Average {}, Low {}, High {}".format(
-                list_average(diastolics),  
-                list_high_low(diastolics)[0],
-                list_high_low(diastolics)[1],
-                ))
-                print("Pulse: Average {}, Low {}, High {}".format(
-                list_average(pulses),  
-                list_high_low(pulses)[0],
-                list_high_low(pulses)[1],
-                ))
             except Exception as e:  # !!! Against all advice I've read!
                 ##  !! Leam: we need to NOT catch all exceptions!
                 ##  !! .. a big "NO NO" from everything I've read
                 print("Error processing report data", e)
-        else:
-            print("Cannot find ", report_file)
-     
+            systolics, diastolics, pulses  = list_collations(report_data)
+            print("Systolic: Average {}, Low {}, High {}".format(
+            list_average(systolics),  
+            list_high_low(systolics)[0],
+            list_high_low(systolics)[1],
+            ))
+            print("Diastolic: Average {}, Low {}, High {}".format(
+            list_average(diastolics),  
+            list_high_low(diastolics)[0],
+            list_high_low(diastolics)[1],
+            ))
+            print("Pulse: Average {}, Low {}, High {}".format(
+            list_average(pulses),  
+            list_high_low(pulses)[0],
+            list_high_low(pulses)[1],
+            ))
+
 
