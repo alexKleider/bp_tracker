@@ -204,6 +204,9 @@ if __name__ == '__main__':
         report_file = args.file
         print("Reassigned data file to '{}'."
                 .format(report_file))
+    else:
+        print("Using '{}' as data file."
+            .format(report_file))
 
     if args.add:
         # This format allows sequencing now and parsing later.
