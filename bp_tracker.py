@@ -24,6 +24,15 @@ import os.path
 # in future will probably read a config file to set this global..
 DEFAULT_REPORT_FILE = "data/bp_numbers.txt"
 
+report_format ="""
+Lows, Highs & Averages:
+=======================
+           | Low  | High | Avg  |
+           | ---  | ---  | ---- |
+Systolic ..|{sl:^6}|{sh:^6}|{sa:^6}|
+Diastolic .|{dl:^6}|{dh:^6}|{da:^6}|
+Pulse .....|{pl:^6}|{ph:^6}|{pa:^6}|
+"""
 
 def check_validity_of_data_file(file):
     if not os.path.exists(file):
@@ -137,7 +146,32 @@ def list_collations(report_data):
         diastolics.append(int(datum[1]))
         pulses.append(int(datum[2]))
 
+#   _ = input("list_collections provides:\n" +
+#           repr((systolics, diastolics, pulses)))
     return systolics, diastolics, pulses
+
+
+def dict_for_display(report_data):
+    """
+    Takes a data set each entry of which contains a minimum of 3
+    strings, each representing an int.
+    Returns a dict of ints keyed by:
+        sh, sa, sl,  # s(ystolic  h{ighest a(verage l(lowest
+        dh, da, dl,  # d(iastolic
+        ph, pa, pl.  # p(ulse
+    """
+    systolics, diastolics, pulses = list_collations(report_data)
+    res = {}
+    res['sl'] = list_high_low(systolics)[0]
+    res['sh'] = list_high_low(systolics)[1]
+    res['sa'] = list_average(systolics)
+    res['dl'] = list_high_low(diastolics)[0]
+    res['dh'] = list_high_low(diastolics)[1]
+    res['da'] = list_average(diastolics) 
+    res['pl'] = list_high_low(pulses)[0]
+    res['ph'] = list_high_low(pulses)[1]
+    res['pa'] = list_average(pulses) 
+    return res
 
 
 def list_average(l):
@@ -271,31 +305,38 @@ if __name__ == '__main__':
             .format(*avgs))
     else: 
         # Default behavior is to report.
-    #       print("...going to default behaviour...")
-        if validity == empty:
+#       print("...going to default behaviour...")
+        if validity == "empty":
             print("No data in specified file")
             sys.exit()
-            try:
-                report_data = array_from_file(report_file)
-            except Exception as e:  # !!! Against all advice I've read!
-                ##  !! Leam: we need to NOT catch all exceptions!
-                ##  !! .. a big "NO NO" from everything I've read
-                print("Error processing report data", e)
-            systolics, diastolics, pulses  = list_collations(report_data)
-            print("Systolic: Average {}, Low {}, High {}".format(
-            list_average(systolics),  
-            list_high_low(systolics)[0],
-            list_high_low(systolics)[1],
-            ))
-            print("Diastolic: Average {}, Low {}, High {}".format(
-            list_average(diastolics),  
-            list_high_low(diastolics)[0],
-            list_high_low(diastolics)[1],
-            ))
-            print("Pulse: Average {}, Low {}, High {}".format(
-            list_average(pulses),  
-            list_high_low(pulses)[0],
-            list_high_low(pulses)[1],
-            ))
+        try:
+            report_data = array_from_file(report_file)
+        except Exception as e:  # !!! Against all advice I've read!
+            ##  !! Leam: we need to NOT catch all exceptions!
+            ##  !! .. a big "NO NO" from everything I've read
+            ##  !! always mentioned in any listing of "antipatterns"!
+            print("ERROR- could be any error!!!")
+            print("Error processing report data", e)
+            raise
+        print(report_format
+                .format(**dict_for_display(report_data)))
+        redact = '''
+        systolics, diastolics, pulses  = list_collations(report_data)
+        print("Systolic: Average {}, Low {}, High {}".format(
+        list_average(systolics),  
+        list_high_low(systolics)[0],
+        list_high_low(systolics)[1],
+        ))
+        print("Diastolic: Average {}, Low {}, High {}".format(
+        list_average(diastolics),  
+        list_high_low(diastolics)[0],
+        list_high_low(diastolics)[1],
+        ))
+        print("Pulse: Average {}, Low {}, High {}".format(
+        list_average(pulses),  
+        list_high_low(pulses)[0],
+        list_high_low(pulses)[1],
+        ))
+        '''
 
 
