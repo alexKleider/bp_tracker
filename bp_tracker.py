@@ -35,12 +35,21 @@ Pulse .....|{pl:^6}|{ph:^6}|{pa:^6}|
 """
 
 def check_validity_of_data_file(file):
+    """
+    sys.exit() if file doesn't exist.
+    Returns "empty" (valid for data entry, not for analyis) or
+    "valid" if has content (which may or may not be valid!)
+    """
     if not os.path.exists(file):
         print("Cannot find ", file)
         sys.exit()
     elif os.path.getsize(file) == 0:
         return 'empty'
     else:
+        #? Should we check for 'true' validity as in..
+        #? contains only valid data lines.
+        #? currently invalid lines will be caught during data analysis
+        #? but addition of valid data to an invalid file is permitted.
         return 'valid'
 
 def useful_lines(stream, comment="#"):
