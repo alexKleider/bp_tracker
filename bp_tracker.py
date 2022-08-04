@@ -18,39 +18,43 @@
 import sys
 import argparse
 from datetime import datetime
-import os.path
+import os
 
 # Making this a global constant for now:
 # in future will probably read a config file to set this global..
 DEFAULT_REPORT_FILE = "data/bp_numbers.txt"
 
 report_format ="""
-Lows, Highs & Averages:
-=======================
            | Low  | High | Avg  |
-           | ---  | ---  | ---- |
 Systolic ..|{sl:^6}|{sh:^6}|{sa:^6}|
 Diastolic .|{dl:^6}|{dh:^6}|{da:^6}|
 Pulse .....|{pl:^6}|{ph:^6}|{pa:^6}|
 """
 
-def check_validity_of_data_file(file):
+def check_file(file):
     """
-    sys.exit() if file doesn't exist.
-    Returns "empty" (valid for data entry, not for analyis) or
-    "valid" if has content (which may or may not be valid!)
+    sys.exit() if file doesn't exist or can't be read.
+    Returns a tuple containing none or any number of the
+    following values:
+        "empty" (valid for data entry, not for analyis)
+        "writeable" (valid for data entry)
     """
     if not os.path.exists(file):
         print("Cannot find ", file)
         sys.exit()
-    elif os.path.getsize(file) == 0:
-        return 'empty'
-    else:
-        #? Should we check for 'true' validity as in..
-        #? contains only valid data lines.
-        #? currently invalid lines will be caught during data analysis
-        #? but addition of valid data to an invalid file is permitted.
-        return 'valid'
+    if not os.access(file, os.R_OK):
+        print("Cannot read ", file)
+        sys.exit()
+    ret = []
+    if os.access(file, os.W_OK):
+        ret.append("writeable")
+    if os.path.getsize(file) == 0:
+        ret.append('empty')
+    #? Should we check for 'true' validity as in..
+    #? contains only valid data lines.
+    #? Invalid lines currently caught during data analysis,
+    #? addition of valid to invalid data is permitted.
+    return ret
 
 def useful_lines(stream, comment="#"):
     """
@@ -75,8 +79,10 @@ def array_from_file(report_file):
     Input is the report file: four (string) values per line.[1]
     Output is a list of 4 tuples.
     Tuples are: systolic, diastolic, pulse, time stamp.[1]
-    [1] Each element is a string representation of a number:
+    [1] Each of the 4 strings represents a number:
     first three are integers, last (the fourth) is a float.
+    #? the last isn't really a float: it's YYYYmmdd.hhmm
+    #? a string representation of a timestamp!
     """
     data = []
     #! replace with clause with store_report function
@@ -276,11 +282,14 @@ if __name__ == '__main__':
 
     # Me thinks this is the time to check that the file
     # exists and contains valid data.
-    validity = check_validity_of_data_file(report_file)
+    validity = check_file(report_file)
 
     # User wants to add data:
     if args.add:
         # This format allows sequencing now and parsing later.
+        if not "writeable" in check_file(report_file):
+            print("Unable to write to", report_file)
+            sys.exit()
         timestamp   = datetime.now().strftime("%Y%m%d.%H%M")
         this_report = args.add
         this_report.append(timestamp) 
@@ -289,7 +298,7 @@ if __name__ == '__main__':
             file.write("{} {} {} {}\n".format(*this_report))
     # User wants averages displayed:
     elif args.averages:
-        if validity == "empty":
+        if "empty" in check_file(report_file):
             print("No data in specified file")
             sys.exit()
         n = int(args.averages[0])
@@ -315,9 +324,13 @@ if __name__ == '__main__':
     else: 
         # Default behavior is to report.
 #       print("...going to default behaviour...")
-        if validity == "empty":
+        if "empty" in check_file(report_file):
             print("No data in specified file")
             sys.exit()
+        report_data = array_from_file(report_file)
+        print(report_format
+                .format(**dict_for_display(report_data)))
+    redacted = '''
         try:
             report_data = array_from_file(report_file)
         except Exception as e:  # !!! Against all advice I've read!
@@ -329,23 +342,5 @@ if __name__ == '__main__':
             raise
         print(report_format
                 .format(**dict_for_display(report_data)))
-        redact = '''
-        systolics, diastolics, pulses  = list_collations(report_data)
-        print("Systolic: Average {}, Low {}, High {}".format(
-        list_average(systolics),  
-        list_high_low(systolics)[0],
-        list_high_low(systolics)[1],
-        ))
-        print("Diastolic: Average {}, Low {}, High {}".format(
-        list_average(diastolics),  
-        list_high_low(diastolics)[0],
-        list_high_low(diastolics)[1],
-        ))
-        print("Pulse: Average {}, Low {}, High {}".format(
-        list_average(pulses),  
-        list_high_low(pulses)[0],
-        list_high_low(pulses)[1],
-        ))
-        '''
-
+'''
 

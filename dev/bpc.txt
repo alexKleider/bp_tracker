@@ -1,0 +1,50 @@
+# Blood Pressure Category ('bpc.txt')
+
+CATEGORY               MINIMUM   MAXIMUM
+
+Hypertension-stage 4  Above 210/ Above 120  } } Hypertensive Crisis
+                                              }
+Hypertension-stage 3     180        210     } }
+                         110        120     } }
+
+Hypertension-stage 2     160        179     }
+                         100        109     }
+
+Hypertension-stage 1     140        159     }
+                          90         99     }
+
+Pre-hypertension         130        139     }
+                          85         89     }
+
+High Normal BP           121        129     } }
+                          81         89     } }
+                                              }  Normal
+Normal (Ideal) BP        100        120     } }
+                          65         80     } }  Blood
+                                              }
+Low Normal BP             90         99     } }  Pressure
+                          60         64     } }
+
+Moderate Hypotension      70         89     }
+                          40         59     }
+
+Severe Hypotension        50         69     }
+                          35         39     }
+
+Extremely Severe Hypotension   Below 50     } Dangeroulsy
+                               Below 35     } Low BP
+systolics =  (0, 50, 70, 90, 100, 121, 130, 140, 160, 180, 210, )
+diastolics = (0, 35, 40, 60,  65,  81,  85,  90, 100, 110, 120, )
+categories = ('extreme hypotension',
+              'severe hypotension',
+              'moderate hpyotension',
+              'low normal blood pressure',
+              'ideal blood pressure',
+              'high normal blood pressure',
+              'pre-hypertension',
+              'stage 1 hypertension',
+              'stage 2 hypertension',
+              'stage 3 hypertension',
+              'hypertensive crisis',
+              )
+
