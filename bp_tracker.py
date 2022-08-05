@@ -22,7 +22,9 @@ import os
 
 # Making this a global constant for now:
 # in future will probably read a config file to set this global..
-DEFAULT_REPORT_FILE = "data/bp_numbers.txt"
+#DEFAULT_REPORT_FILE = "data/bp_numbers.txt"
+
+report_file = 'bp_numbers.txt'
 
 report_format ="""
            | Low  | High | Avg  |
@@ -31,30 +33,19 @@ Diastolic .|{dl:^6}|{dh:^6}|{da:^6}|
 Pulse .....|{pl:^6}|{ph:^6}|{pa:^6}|
 """
 
-def check_file(file):
+def check_file(file, mode):
     """
-    sys.exit() if file doesn't exist or can't be read.
-    Returns a tuple containing none or any number of the
-    following values:
-        "empty" (valid for data entry, not for analyis)
-        "writeable" (valid for data entry)
+    On mode add, return True if the file is present and writeable, the file 
+    is not present but the directory is writeable
     """
-    if not os.path.exists(file):
-        print("Cannot find ", file)
-        sys.exit()
-    if not os.access(file, os.R_OK):
-        print("Cannot read ", file)
-        sys.exit()
-    ret = []
-    if os.access(file, os.W_OK):
-        ret.append("writeable")
-    if os.path.getsize(file) == 0:
-        ret.append('empty')
-    #? Should we check for 'true' validity as in..
-    #? contains only valid data lines.
-    #? Invalid lines currently caught during data analysis,
-    #? addition of valid to invalid data is permitted.
-    return ret
+    if mode == 'r' and os.access(file, os.R_OK):
+        return True
+    if mode == 'w':
+        if os.access(file, os.W_OK):
+            return True
+        if not os.path.exists(file) and os.access(os.path.dirname(file), os.W_OK):
+            return True
+    return False
 
 def useful_lines(stream, comment="#"):
     """
@@ -280,27 +271,24 @@ if __name__ == '__main__':
         print("Using '{}' as data file."
             .format(report_file))
 
-    # Me thinks this is the time to check that the file
-    # exists and contains valid data.
-    validity = check_file(report_file)
-
     # User wants to add data:
     if args.add:
         # This format allows sequencing now and parsing later.
-        if not "writeable" in check_file(report_file):
+        if check_file(report_file, 'w'):
+            timestamp   = datetime.now().strftime("%Y%m%d.%H%M")
+            this_report = args.add
+            this_report.append(timestamp) 
+            #! replace next two lines with store_report function
+            with open(report_file, 'a') as file:
+                file.write("{} {} {} {}\n".format(*this_report))
+        else:
             print("Unable to write to", report_file)
-            sys.exit()
-        timestamp   = datetime.now().strftime("%Y%m%d.%H%M")
-        this_report = args.add
-        this_report.append(timestamp) 
-        #! replace next two lines with store_report function
-        with open(report_file, 'a') as file:
-            file.write("{} {} {} {}\n".format(*this_report))
+            sys.exit(1)
     # User wants averages displayed:
     elif args.averages:
-        if "empty" in check_file(report_file):
-            print("No data in specified file")
-            sys.exit()
+        if not check_file(report_file, 'r'):
+            print("Unable to find ", report_file)
+            sys.exit(1)
         n = int(args.averages[0])
         data = array_from_file(report_file)
         l = len(data)

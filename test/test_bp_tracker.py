@@ -3,14 +3,18 @@
 # File tests.py
 
 import os
+import os.path
+import tempfile
 import unittest
 
 import bp_tracker
 
+# Need to use specific files in each test, not an actual data file.
+# That will let us do the averages.
 infile = 'data/bp_numbers.txt'
 # We assume there is such a data file, the more entries the better.
-non_existent_file = "ghostfile"  # our nonexistent file
-empty_file = "empty"  # our empty file
+#non_existent_file = "ghostfile"  # our nonexistent file
+#empty_file = "empty"  # our empty file
 
 # Begin with two helper functions:
 
@@ -44,9 +48,14 @@ def collect_averages(infile):
 
 class TestBpTracker(unittest.TestCase):
 
+    def setUp(self):
+        self.test_dir = tempfile.TemporaryDirectory()
+
+    def tearDown(self):
+        self.test_dir.cleanup()
+
     def test_averaging(self):
         averages = collect_averages(infile)
-#       print(averages)
         self.assertEqual(tuple(averages),
                 bp_tracker.averages(
                     bp_tracker.array_from_file(infile))
@@ -56,26 +65,53 @@ class TestBpTracker(unittest.TestCase):
     def test_averaging_only_last_few(self):
         for n in range(7):
             averages = collect_averages(infile)[-7:]
-#           print(averages)
             self.assertEqual(tuple(averages),
                 bp_tracker.averages(
                     bp_tracker.array_from_file(infile)), n
                 )
 
 
-    # write tests for no, empty, good data & bad data files:
+    def test_check_file_readable_file(self):
+        test_file = os.path.join(self.test_dir.name, 'readable.file')
+        with open(test_file, 'w') as f:
+          f.write("howdy\n")
+        self.assertTrue(bp_tracker.check_file(test_file, 'r'))
 
-    def test_no_file(self):
-        pass
 
-    def test_empty_file(self):
-        pass
+    def test_check_file_writeable_file(self):
+        test_file = os.path.join(self.test_dir.name, 'writeable.file')
+        with open(test_file, 'w') as f:
+          f.write("howdy\n")
+        self.assertTrue(bp_tracker.check_file(test_file, 'w'))
 
-    def test_good_data_file(self):
-        pass
+    def test_check_file_writeable_dir(self):
+        test_dir_writeable = os.path.join(self.test_dir.name, 'writeable')
+        os.mkdir(test_dir_writeable)
+        os.chmod(test_dir_writeable, 0o777)
+        test_file = os.path.join(test_dir_writeable, 'missing.file')
+        self.assertTrue(bp_tracker.check_file(test_file, 'w'))
 
-    def test_bad_data_file(self):
-        pass
+    def test_check_file_read_missing_file(self):
+        test_dir_unwriteable = os.path.join(self.test_dir.name, 'unwriteable')
+        os.mkdir(test_dir_unwriteable)
+        os.chmod(test_dir_unwriteable, 0o000)
+        test_file = os.path.join(test_dir_unwriteable, 'missing.file')
+        self.assertFalse(bp_tracker.check_file(test_file, 'w'))
+  
+    def test_check_file_write_unwriteable_file(self):
+        test_file = os.path.join(self.test_dir.name, 'bad_file.txt')
+        with open(test_file, 'w') as f:
+            f.write("bleagh")
+        os.chmod(test_file, 0o000) 
+        self.assertFalse(bp_tracker.check_file(test_file, 'w'))
+
+    def test_check_file_write_unwriteable_dir(self):
+        test_dir_unwriteable = os.path.join(self.test_dir.name, 'unwriteable')
+        os.mkdir(test_dir_unwriteable)
+        os.chmod(test_dir_unwriteable, 0o00)
+        test_file = os.path.join(test_dir_unwriteable, 'bad_dir.file')
+        self.assertFalse(bp_tracker.check_file(test_file, 'w'))
+
 
 if __name__ == '__main__':
     unittest.main()
