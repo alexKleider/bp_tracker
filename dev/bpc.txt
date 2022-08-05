@@ -1,5 +1,10 @@
 # Blood Pressure Category ('bpc.txt')
 
+# https://healthiack.com/wp-content/uploads/blood-pressure-chart-80.jpg
+# wget <the above> ==>
+# file:///home/alex/Git/LH/bp_tracker/dev/blood-pressure-chart-80.jpg
+
+
 CATEGORY               MINIMUM   MAXIMUM
 
 Hypertension-stage 4  Above 210/ Above 120  } } Hypertensive Crisis

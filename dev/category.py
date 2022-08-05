@@ -10,18 +10,18 @@ i.e. systolic and diastolic values don't both fall into the same
 category.
 """
 
-systolics =  (50, 70, 90, 100, 121, 130, 140, 160, 180, 210, )
-diastolics = (35, 40, 60,  65,  81,  85,  90, 100, 110, 120, )
-categories = ('extreme hypotension',
-              'severe hypotension',
-              'moderate hpyotension',
-              'low normal blood pressure',
-              'ideal blood pressure',
-              'high normal blood pressure',
-              'pre-hypertension',
-              'stage 1 hypertension',
-              'stage 2 hypertension',
-              'stage 3 hypertension',
+systolics =  (50, 70, 90, 100, 121, 130, 140, 160, 180, 211, )
+diastolics = (35, 40, 60,  65,  81,  85,  90, 100, 110, 121, )
+categories = ('extreme hypotsn',
+              'severe hypotsn',
+              'moderate hypotsn',
+              'low normal BP',
+              'ideal BP',
+              'high normal BP',
+              'pre-hypertsn',
+              'stage 1 hypertsn',
+              'stage 2 hypertsn',
+              'stage 3 hypertsn',
               'hypertensive crisis',
              )
 
@@ -55,7 +55,7 @@ def get_category(bp, sord):
 #   for n in range(len(categories)):
     for n in range(len(sord)):
         category = categories[n]
-        if bp < sord[n]:
+        if int(bp) < sord[n]:
             return categories[n]
     return categories[-1]
 
@@ -69,13 +69,14 @@ def main():
         dia_category = get_category(diastolic, diastolics)
         if sys_category == dia_category:
             matches += 1
-            addendum = '<match>'
+            print("{}/{} fits '{}'"
+                    .format(systolic, diastolic,
+                        sys_category))
         else:
             missmatches += 1
-            addendum = ''
-        print("{}/{}: {} | {}  {}"
-            .format(systolic, diastolic,
-                sys_category, dia_category, addendum))
+            print("{}/{}: systolic => '{}'; diastolic => '{}'"
+                .format(systolic, diastolic,
+                    sys_category, dia_category))
 
 
 if __name__ == '__main__':
