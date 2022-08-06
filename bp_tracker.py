@@ -20,9 +20,7 @@ import argparse
 from datetime import datetime
 import os
 
-# Making this a global constant for now:
-# in future will probably read a config file to set this global..
-DEFAULT_REPORT_FILE = "data/bp_numbers.txt"
+report_file = 'data/bp_numbers.txt'
 
 report_format ="""
            | Low  | High | Avg  |
@@ -242,8 +240,6 @@ def display_averages(averages):
 
 
 if __name__ == '__main__':
-    report_file = DEFAULT_REPORT_FILE 
-
     # argparser:
     parser = argparse.ArgumentParser()
     parser.add_argument(
