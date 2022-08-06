@@ -318,17 +318,4 @@ if __name__ == '__main__':
         report_data = array_from_file(report_file)
         print(report_format
                 .format(**dict_for_display(report_data)))
-    redacted = '''
-        try:
-            report_data = array_from_file(report_file)
-        except Exception as e:  # !!! Against all advice I've read!
-            ##  !! Leam: we need to NOT catch all exceptions!
-            ##  !! .. a big "NO NO" from everything I've read
-            ##  !! always mentioned in any listing of "antipatterns"!
-            print("ERROR- could be any error!!!")
-            print("Error processing report data", e)
-            raise
-        print(report_format
-                .format(**dict_for_display(report_data)))
-'''
 
