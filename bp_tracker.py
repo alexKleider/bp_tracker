@@ -233,7 +233,7 @@ def display_averages(averages):
 
 
 if __name__ == '__main__':
-    report_file = DEFAULT_REPORT_FILE 
+#   report_file = DEFAULT_REPORT_FILE 
 
     # argparser:
     parser = argparse.ArgumentParser()

@@ -2,6 +2,10 @@
 
 # File: parser_test.py
 
+"""
+Where I'm playing around trying to understand how argparse works.
+"""
+
 import argparse
 
 parser = argparse.ArgumentParser()

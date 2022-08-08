@@ -1,4 +1,4 @@
-# Blood Pressure Category ('bpc.txt')
+# Blood Pressure Category ('aha_bp_levels.txt')
 
 CATEGORY               MINIMUM   MAXIMUM
 
