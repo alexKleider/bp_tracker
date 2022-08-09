@@ -24,6 +24,8 @@ import os
 # in future will probably read a config file to set this global..
 #DEFAULT_REPORT_FILE = "data/bp_numbers.txt"
 
+from dev.category import get_category
+
 report_file = 'bp_numbers.txt'
 
 report_format ="""
@@ -284,6 +286,15 @@ if __name__ == '__main__':
         else:
             print("Unable to write to", report_file)
             sys.exit(1)
+        print(this_report)
+        sys, dia, pulse, date = this_report
+        print("Recording BP of {}/{} classified as"
+            .format(sys, dia))
+        print("{} / {}"
+            .format(
+                get_category(sys, 's'),
+                get_category(dia, 'd')
+                ))
     # User wants averages displayed:
     elif args.averages:
         if not check_file(report_file, 'r'):
