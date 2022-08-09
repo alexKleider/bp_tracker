@@ -286,7 +286,7 @@ if __name__ == '__main__':
         else:
             print("Unable to write to", report_file)
             sys.exit(1)
-        print(this_report)
+#       print(this_report)
         sys, dia, pulse, date = this_report
         print("Recording BP of {}/{} classified as"
             .format(sys, dia))
