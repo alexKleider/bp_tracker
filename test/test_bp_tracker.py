@@ -30,6 +30,9 @@ def increment_sums_by_values(sums, values):
         sums[n] += values[n]
 
 
+# It is generally easier to put the data into the test. Relying on an 
+# actual data file is fragile, it changes data and location.
+# Try to keep the test as self-contained as possible. 
 def collect_averages(infile):
     """
     By collecting the same data in a different way we can
@@ -63,13 +66,44 @@ class TestBpTracker(unittest.TestCase):
     def tearDown(self):
         self.test_dir.cleanup()
 
-    def test_averaging(self):
+    #def test_averaging(self):
+    def test_averaging_from_file_with_good_data(self):
+        # Using the below as a starting point, write two lines to the file.
+        # You can hard code the 'averages' and not need the methods above.
+
+        #test_file = os.path.join(self.test_dir.name, 'readable.file')
+        #with open(test_file, 'w') as f:
+        #  f.write("howdy\n")
+        #self.assertTrue(bp_tracker.check_file(test_file, 'r'))
+
         averages = collect_averages(infile)
         self.assertEqual(tuple(averages),
                 bp_tracker.averages(
                     bp_tracker.array_from_file(infile))
                 )
 
+    def test_averaging_from_file_with_comments(self):
+        # Using the below as a starting point, write two good data  lines 
+        # to the file, and two comment lines.
+        # You can hard code the 'averages' and not need the methods above.
+
+        #test_file = os.path.join(self.test_dir.name, 'readable.file')
+        #with open(test_file, 'w') as f:
+        #  f.write("howdy\n")
+        #self.assertTrue(bp_tracker.check_file(test_file, 'r'))
+
+        averages = collect_averages(infile)
+        self.assertEqual(tuple(averages),
+                bp_tracker.averages(
+                    bp_tracker.array_from_file(infile))
+                )
+
+    def test_average(self):
+        # Isolate the average function, and test it.
+        pass
+
+    def test_list_high_low(self):
+        pass
 
     def test_averaging_only_last_few(self):
         for n in range(7):
@@ -121,10 +155,6 @@ class TestBpTracker(unittest.TestCase):
         test_file = os.path.join(test_dir_unwriteable, 'bad_dir.file')
         self.assertFalse(bp_tracker.check_file(test_file, 'w'))
 
-    def test_check_file(self):
-        pass
-
-
 
     def test_useful_lines(self):  # (stream, comment="#"):
         expected = [
@@ -148,33 +178,46 @@ class TestBpTracker(unittest.TestCase):
         self.assertEqual([line for line in bp_tracker.useful_lines(
                 self.stream, comment='#')], expected)
 
-
-    def test_array_from_file(self):  # report_file):
+    def test_array_from_file(self):
+        # Write a test file with three lines of data, and test that the
+        # returned list has a len of 3.
         pass
 
-    def test_report(self):  # report_data):
+    def test_report(self):
+        # Pass in hard coded data, test the result values.
         pass
 
-    def test_print_report(self):  # highest_systolic_event,
+    def test_print_report(self):
+        # This one is a little trickier, but you just pass in data,
+        # capture the output, split the output into a list of lines,
+        # then test each line.
         pass
 
-    def test_list_collations(self):  # report_data):
+    def test_list_collations(self):
+        # Pass in hard coded data, test the result values.
         pass
 
-    def test_dict_for_display(self):  # (report_data):
+    def test_dict_for_display(self):
+        # Pass in hard coded data, test the result values.
         pass
 
-    def test_list_average(self):  # (l):
+    def test_list_average(self):
+        # Pass in hard coded data, test the result values.
         pass
 
-    def test_list_high_low(self):  # (l):
+    def test_list_high_low(self):
+        # Pass in hard coded data, test the result values.
         pass
 
-    def test_averages(self):  # (data, n=None):
+    def test_averages(self):
+        # Pass in hard coded data, test the result values.
         pass
 
-    def test_display_averages(self):  # (averages):
+    def test_display_averages(self):
+        # Pass in hard coded data, test the result.
         pass
+
+    
 
 if __name__ == '__main__':
     unittest.main()

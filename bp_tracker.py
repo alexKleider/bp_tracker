@@ -3,7 +3,7 @@
 # name:     bp_tracker.py
 # version:  0.0.1
 # date:     20220509
-# author:   Leam Hall
+# authors:  Leam Hall, Alex Kleider
 # desc:     Track and report on blood pressure numbers.
 
 # Notes:
