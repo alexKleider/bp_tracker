@@ -37,8 +37,8 @@ Pulse .....|{pl:^6}|{ph:^6}|{pa:^6}|
 
 def check_file(file, mode):
     """
-    On mode add, return True if the file is present and writeable, the file 
-    is not present but the directory is writeable
+    Mode (must be 'r' or 'w') specifies if we need to 
+    r)ead or w)rite to the file.
     """
     if mode == 'r' and os.access(file, os.R_OK):
         return True
@@ -85,11 +85,10 @@ def array_from_file(report_file):
             if len(datum) == 4:
                 data.append(tuple(datum))
             else:
-                print("Badly formated line found in input file:")
-                print('"{}"'.format(line))
-#   print("Returning the following data:")
-#   print(data)
-#   print("...end of data")
+                raise Exception(
+                  "Badly formated line found in input ..."
+                  + "\n file: {}" .format(report_file),
+                  + '\n"{}"'.format(line))
     return data
  
 
@@ -323,10 +322,8 @@ if __name__ == '__main__':
     else: 
         # Default behavior is to report.
 #       print("...going to default behaviour...")
-        if "empty" in check_file(report_file):
-            print("No data in specified file")
-            sys.exit()
-        report_data = array_from_file(report_file)
-        print(report_format
+        if check_file(report_file, 'r'):
+            report_data = array_from_file(report_file)
+            print(report_format
                 .format(**dict_for_display(report_data)))
 

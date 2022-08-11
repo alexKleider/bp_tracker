@@ -11,7 +11,7 @@ import bp_tracker
 
 # Need to use specific files in each test, not an actual data file.
 # That will let us do the averages.
-infile = 'data/bp_numbers.txt'
+infile = 'bp_numbers.txt'
 # We assume there is such a data file, the more entries the better.
 #non_existent_file = "ghostfile"  # our nonexistent file
 #empty_file = "empty"  # our empty file
@@ -47,6 +47,15 @@ def collect_averages(infile):
 
 
 class TestBpTracker(unittest.TestCase):
+
+    stream = [
+        "The quick brown fox",
+        "   jumped over the moon",
+        "    "
+        "# but of course this is rediculous!",
+        " # as is this.",
+        "        indented => unindented line",
+        ]
 
     def setUp(self):
         self.test_dir = tempfile.TemporaryDirectory()
@@ -112,6 +121,60 @@ class TestBpTracker(unittest.TestCase):
         test_file = os.path.join(test_dir_unwriteable, 'bad_dir.file')
         self.assertFalse(bp_tracker.check_file(test_file, 'w'))
 
+    def test_check_file(self):
+        pass
+
+
+
+    def test_useful_lines(self):  # (stream, comment="#"):
+        expected = [
+        "The quick brown fox",
+        "jumped over the moon",
+        "# but of course this is rediculous!",
+        "# as is this.",
+        "indented => unindented line",
+            ]
+        self.assertEqual([line for line in
+                bp_tracker.useful_lines( self.stream, comment='')],
+                expected)
+
+
+    def test_useful_lines_without_comments(self):
+        expected = [
+        "The quick brown fox",
+        "jumped over the moon",
+        "indented => unindented line",
+            ]
+        self.assertEqual([line for line in bp_tracker.useful_lines(
+                self.stream, comment='#')], expected)
+
+
+    def test_array_from_file(self):  # report_file):
+        pass
+
+    def test_report(self):  # report_data):
+        pass
+
+    def test_print_report(self):  # highest_systolic_event,
+        pass
+
+    def test_list_collations(self):  # report_data):
+        pass
+
+    def test_dict_for_display(self):  # (report_data):
+        pass
+
+    def test_list_average(self):  # (l):
+        pass
+
+    def test_list_high_low(self):  # (l):
+        pass
+
+    def test_averages(self):  # (data, n=None):
+        pass
+
+    def test_display_averages(self):  # (averages):
+        pass
 
 if __name__ == '__main__':
     unittest.main()
