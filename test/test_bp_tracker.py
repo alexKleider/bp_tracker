@@ -91,16 +91,31 @@ class TestBpTracker(unittest.TestCase):
         #with open(test_file, 'w') as f:
         #  f.write("howdy\n")
         #self.assertTrue(bp_tracker.check_file(test_file, 'r'))
+        print("running test_averaging_from_file_with_comments")
 
         averages = collect_averages(infile)
         self.assertEqual(tuple(averages),
                 bp_tracker.averages(
-                    bp_tracker.array_from_file(infile))
-                )
+                    bp_tracker.array_from_file(infile)))
 
-    def test_average(self):
+
+#   def test_average(self):
+#       #!!! there is no 'def average()' function.
+#       #!!! I assume you mean 'def list_average(l)' function.
+
+    def test_list_average(self):
         # Isolate the average function, and test it.
-        pass
+        self.assertEqual(1, 2)
+        print("running test_list_average")
+        lists = (
+            ([],                   0),
+            ([1, 2, 3, 4],         2.5),
+            (['1', '2', '3', '4'], 2.5),
+            (['5', 5],             5),
+            ((1, 2, 3, 4, 5, 6, 7), 0),   # this should fail!!! 4
+            )
+        for l in lists:
+            self.assertEqual(list_average(l[0]), l[1])
 
     def test_list_high_low(self):
         pass
@@ -217,6 +232,11 @@ class TestBpTracker(unittest.TestCase):
         # Pass in hard coded data, test the result.
         pass
 
+
+class TestTestsAreRun(unittest.TestCase):
+    def test_testing(self):
+        print('In test_testing: about to fail!')
+        self.assertEqual(1, 2)
     
 
 if __name__ == '__main__':
