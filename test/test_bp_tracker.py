@@ -97,10 +97,6 @@ class TestBpTracker(unittest.TestCase):
                     bp_tracker.array_from_file(infile)))
 
 
-
-    def test_list_high_low(self):
-        pass
-
     def test_averaging_only_last_few(self):
         for n in range(7):
             averages = collect_averages(infile)[-7:]
@@ -108,6 +104,7 @@ class TestBpTracker(unittest.TestCase):
                 bp_tracker.averages(
                     bp_tracker.array_from_file(infile)), n
                 )
+
 
 
     def test_check_file_readable_file(self):
