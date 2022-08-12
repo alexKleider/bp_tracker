@@ -186,6 +186,7 @@ def list_average(l):
     Takes a numeric list and returns the average
     expressed as an integer.
     """
+    if not l: return 0  # list might be empty!
     average = sum(l) // len(l)
     return average
 
