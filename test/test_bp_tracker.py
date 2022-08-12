@@ -18,6 +18,15 @@ infile = 'bp_numbers.txt'
 
 # Begin with two helper functions:
 
+to_test_ck4duplicate_tests = '''
+def increment_sums_by_values(sums, values):
+    """
+    Include this redundant declaration just to check 
+    that checking for duplicates actually works.
+    """
+    pass
+'''
+
 def increment_sums_by_values(sums, values):
     """
     <sums> is an iterable of running totals.
