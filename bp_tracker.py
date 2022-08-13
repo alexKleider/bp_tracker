@@ -87,13 +87,14 @@ def array_from_file(report_file):
             else:
                 raise Exception(
                   "Badly formated line found in input ..."
-                  + "\n file: {}" .format(report_file),
+                  + "\n file: {}" .format(report_file)
                   + '\n"{}"'.format(line))
     return data
  
 
 def report(report_data):
     """
+    #! not used
     Input is a list of 4 tuples.
     Output is a 4 tuple, each member of which is
     the highest of its category in the input.
@@ -103,7 +104,7 @@ def report(report_data):
     highest_systolic  = 0
     highest_diastolic = 0
     highest_pulse     = 0
-    latest            = -1.0
+    latest_date       = 0.0
     for datum in report_data:
         systolic  = int(datum[0])
         diastolic = int(datum[1])
@@ -118,7 +119,8 @@ def report(report_data):
         if pulse > highest_pulse:
             highest_pulse = pulse
             highest_pulse_event = datum
-        if date > latest:
+        if date > latest_date:
+            latest_date = date
             latest_record = datum
     return (highest_systolic_event, highest_diastolic_event,
             highest_pulse_event, latest_record,)
@@ -127,15 +129,19 @@ def report(report_data):
 def print_report(highest_systolic_event,
                 highest_diastolic_event,
                 highest_pulse_event,
-                latest_record):
+                latest_record,
+                outstream=sys.stdout):
+    """
+    #! not used
+    """
     print("Highest Systolic: {}/{} {} {}"
-            .format(*highest_systolic_event))
+            .format(*highest_systolic_event),file=outstream)
     print("Highest Diastolic: {}/{} {} {}"
-            .format(*highest_diastolic_event))
+            .format(*highest_diastolic_event),file=outstream)
     print("Highest Pulse: {}/{} {} {}"
-            .format(*highest_pulse_event))
+            .format(*highest_pulse_event),file=outstream)
     print("Latest Record: {}/{} {} {}"
-            .format(*latest_record))
+            .format(*latest_record),file=outstream)
 
 
 def list_collations(report_data):

@@ -38,9 +38,20 @@ def increment_sums_by_values(sums, values):
     for n in range(len(values)):
         sums[n] += values[n]
 
+# And add a helper class:
 
-# It is generally easier to put the data into the test. Relying on an 
-# actual data file is fragile, it changes data and location.
+class Collector(object):
+
+    def __init__(self, lines=[]):
+        self.lines = lines
+
+    def write(self, text):
+        self.lines.append(text)
+        
+
+# It is generally easier to put the data into the test.
+# Relying on an actual data file is fragile,
+# it changes data and location.
 # Try to keep the test as self-contained as possible. 
 def collect_averages(infile):
     """
@@ -77,13 +88,16 @@ class TestBpTracker(unittest.TestCase):
 
     #def test_averaging(self):
     def test_averaging_from_file_with_good_data(self):
-        # Using the below as a starting point, write two lines to the file.
-        # You can hard code the 'averages' and not need the methods above.
+        # Using the below as a starting point,
+        # write two lines to the file.
+        # You can hard code the 'averages' and
+        # not need the methods above.
 
-        #test_file = os.path.join(self.test_dir.name, 'readable.file')
-        #with open(test_file, 'w') as f:
-        #  f.write("howdy\n")
-        #self.assertTrue(bp_tracker.check_file(test_file, 'r'))
+#       test_file = os.path.join(self.test_dir.name,
+#                                'readable.file')
+#       with open(test_file, 'w') as f:
+#          f.write("howdy\n")
+#       self.assertTrue(bp_tracker.check_file(test_file, 'r'))
 
         averages = collect_averages(infile)
         self.assertEqual(tuple(averages),
@@ -92,14 +106,17 @@ class TestBpTracker(unittest.TestCase):
                 )
 
     def test_averaging_from_file_with_comments(self):
-        # Using the below as a starting point, write two good data  lines 
-        # to the file, and two comment lines.
-        # You can hard code the 'averages' and not need the methods above.
+        # Using the below as a starting point, write two good
+        # data lines and two comment lines to the file,
+        # You can hard code the 'averages' and
+        # not need the methods above.
 
-        #test_file = os.path.join(self.test_dir.name, 'readable.file')
-        #with open(test_file, 'w') as f:
-        #  f.write("howdy\n")
-        #self.assertTrue(bp_tracker.check_file(test_file, 'r'))
+#       test_file = os.path.join(self.test_dir.name,
+#                                'readable.file')
+#       with open(test_file, 'w') as f:
+#          f.write("howdy\n")
+#       self.assertTrue(bp_tracker.check_file(test_file, 'r'))
+
         averages = collect_averages(infile)
         self.assertEqual(tuple(averages),
                 bp_tracker.averages(
@@ -115,11 +132,11 @@ class TestBpTracker(unittest.TestCase):
                 )
 
 
-
     def test_check_file_readable_file(self):
-        test_file = os.path.join(self.test_dir.name, 'readable.file')
+        test_file = os.path.join(self.test_dir.name,
+                                 'readable.file')
         with open(test_file, 'w') as f:
-          f.write("howdy\n")
+            f.write("howdy\n")
         self.assertTrue(bp_tracker.check_file(test_file, 'r'))
 
 
@@ -129,32 +146,43 @@ class TestBpTracker(unittest.TestCase):
           f.write("howdy\n")
         self.assertTrue(bp_tracker.check_file(test_file, 'w'))
 
+
     def test_check_file_writeable_dir(self):
-        test_dir_writeable = os.path.join(self.test_dir.name, 'writeable')
+        test_dir_writeable = os.path.join(self.test_dir.name,
+                                          'writeable')
         os.mkdir(test_dir_writeable)
         os.chmod(test_dir_writeable, 0o777)
-        test_file = os.path.join(test_dir_writeable, 'missing.file')
+        test_file = os.path.join(test_dir_writeable,
+                                 'missing.file')
         self.assertTrue(bp_tracker.check_file(test_file, 'w'))
 
+
     def test_check_file_read_missing_file(self):
-        test_dir_unwriteable = os.path.join(self.test_dir.name, 'unwriteable')
+        test_dir_unwriteable = os.path.join(self.test_dir.name,
+                                            'unwriteable')
         os.mkdir(test_dir_unwriteable)
         os.chmod(test_dir_unwriteable, 0o000)
-        test_file = os.path.join(test_dir_unwriteable, 'missing.file')
+        test_file = os.path.join(test_dir_unwriteable,
+                                 'missing.file')
         self.assertFalse(bp_tracker.check_file(test_file, 'w'))
   
+
     def test_check_file_write_unwriteable_file(self):
-        test_file = os.path.join(self.test_dir.name, 'bad_file.txt')
+        test_file = os.path.join(self.test_dir.name,
+                                 'bad_file.txt')
         with open(test_file, 'w') as f:
             f.write("bleagh")
         os.chmod(test_file, 0o000) 
         self.assertFalse(bp_tracker.check_file(test_file, 'w'))
 
+
     def test_check_file_write_unwriteable_dir(self):
-        test_dir_unwriteable = os.path.join(self.test_dir.name, 'unwriteable')
+        test_dir_unwriteable = os.path.join(self.test_dir.name,
+                                            'unwriteable')
         os.mkdir(test_dir_unwriteable)
         os.chmod(test_dir_unwriteable, 0o00)
-        test_file = os.path.join(test_dir_unwriteable, 'bad_dir.file')
+        test_file = os.path.join(test_dir_unwriteable,
+                                 'bad_dir.file')
         self.assertFalse(bp_tracker.check_file(test_file, 'w'))
 
 
@@ -167,7 +195,8 @@ class TestBpTracker(unittest.TestCase):
         "indented => unindented line",
             ]
         self.assertEqual([line for line in
-                bp_tracker.useful_lines( self.stream, comment='')],
+                bp_tracker.useful_lines(self.stream,
+                                        comment='')],
                 expected)
 
 
@@ -177,23 +206,69 @@ class TestBpTracker(unittest.TestCase):
         "jumped over the moon",
         "indented => unindented line",
             ]
-        self.assertEqual([line for line in bp_tracker.useful_lines(
-                self.stream, comment='#')], expected)
+        self.assertEqual([line for line in
+            bp_tracker.useful_lines(self.stream, comment='#')],
+            expected)
+
 
     def test_array_from_file(self):
-        # Write a test file with three lines of data, and test that the
-        # returned list has a len of 3.
-        pass
+        # Write a test file with three lines of data,
+        # and test that the returned list has a len of 3.
+        data = (
+            "110 59 68 20220809.1640",
+            "124 62 62 20220810.0840",
+            "134 63 57 20220812.0758",
+            "134 62 57 20220812.1128",
+            "100 59 62 20220812.1323",
+                )
+        report_file = os.path.join(self.test_dir.name,
+                                    'bp-data.txt')
+        with open(report_file, 'w') as f:
+            for line in data:
+                f.write(line + "\n")
+        res = bp_tracker.array_from_file(report_file)
+        self.assertEqual(5, len(res))
+        for tup in res:
+            self.assertEqual(4, len(tup))
+
 
     def test_report(self):
         # Pass in hard coded data, test the result values.
-        pass
+        #! Note: the bp_tracker.report function is NOT used!
+        data = [
+            ('110', '59', '68', '20220812.1323'),
+            ('124', '62', '62', '20220810.0840'),
+            ('134', '63', '57', '20220812.0758'),
+            ('134', '62', '57', '20220812.1128'),
+            ('100', '59', '62', '20220809.1640'),
+                ]
+        res = bp_tracker.report(data)
+        self.assertEqual(
+            (
+            ('134', '63', '57', '20220812.0758'),
+            ('134', '63', '57', '20220812.0758'),
+            ('110', '59', '68', '20220812.1323'),
+            ('110', '59', '68', '20220812.1323'),
+            ),
+                    res)
+
 
     def test_print_report(self):
         # This one is a little trickier, but you just pass in data,
         # capture the output, split the output into a list of lines,
         # then test each line.
+        #! Note: the bp_tracker.print_report function is NOT used!
         pass
+        collector = Collector()
+        bp_tracker.print_report(
+            ('134', '63', '57', '20220812.0758'),
+            ('134', '63', '57', '20220812.0758'),
+            ('110', '59', '68', '20220812.1323'),
+            ('110', '59', '68', '20220812.1323'),
+                outstream=collector)
+        for line in collector.lines:
+            print(line)
+
 
     def test_list_collations(self):
         # Pass in hard coded data, test the result values.
