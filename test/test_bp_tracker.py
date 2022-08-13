@@ -253,21 +253,24 @@ class TestBpTracker(unittest.TestCase):
                     res)
 
 
-    def test_print_report(self):
+    def test_format_report(self):
         # This one is a little trickier, but you just pass in data,
         # capture the output, split the output into a list of lines,
         # then test each line.
-        #! Note: the bp_tracker.print_report function is NOT used!
-        pass
-        collector = Collector()
-        bp_tracker.print_report(
-            ('134', '63', '57', '20220812.0758'),
-            ('134', '63', '57', '20220812.0758'),
-            ('110', '59', '68', '20220812.1323'),
-            ('110', '59', '68', '20220812.1323'),
-                outstream=collector)
-        for line in collector.lines:
-            print(line)
+          
+        expected = [
+            "          | Low  | High | Avg  |",
+            "Systolic  | 110  | 134  | 122  |",
+            "Diastolic |  59  |  63  |  61  |",
+            "Pulse     |  59  | 110  |  84  |",
+            ]
+        results = bp_tracker.format_report(
+            [134, 134, 110, 110],
+            [63, 63, 59, 59],
+            [59, 59, 110, 110],).split("\n")
+        
+        for line in range(0,4):
+            assert results[line] == expected[line] 
 
 
     def test_list_collations(self):

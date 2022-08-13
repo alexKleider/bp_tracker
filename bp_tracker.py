@@ -35,6 +35,11 @@ Diastolic .|{dl:^6}|{dh:^6}|{da:^6}|
 Pulse .....|{pl:^6}|{ph:^6}|{pa:^6}|
 """
 
+report_format_2 =  "          | Low  | High | Avg  |\n"
+report_format_2 += "Systolic  |{:^6}|{:^6}|{:^6}|\n"
+report_format_2 += "Diastolic |{:^6}|{:^6}|{:^6}|\n"
+report_format_2 += "Pulse     |{:^6}|{:^6}|{:^6}|\n"
+
 def check_file(file, mode):
     """
     Mode (must be 'r' or 'w') specifies if we need to 
@@ -126,23 +131,18 @@ def report(report_data):
             highest_pulse_event, latest_record,)
   
   
-def print_report(highest_systolic_event,
-                highest_diastolic_event,
-                highest_pulse_event,
-                latest_record,
-                outstream=sys.stdout):
+def format_report(systolics, diastolics, pulses, style = report_format_2):
     """
-    #! not used
+    Takes the numeric lists of systolics, diastolics, and pulses, and 
+    return a string for printing.
+    TODO: Allow for different report formats.
     """
-    print("Highest Systolic: {}/{} {} {}"
-            .format(*highest_systolic_event),file=outstream)
-    print("Highest Diastolic: {}/{} {} {}"
-            .format(*highest_diastolic_event),file=outstream)
-    print("Highest Pulse: {}/{} {} {}"
-            .format(*highest_pulse_event),file=outstream)
-    print("Latest Record: {}/{} {} {}"
-            .format(*latest_record),file=outstream)
-
+    sl, sh, sa = list_high_low_avg(systolics)
+    dl, dh, da = list_high_low_avg(diastolics)
+    pl, ph, pa = list_high_low_avg(pulses)
+    
+    result = style.format(sl, sh, sa, dl, dh, da, pl, ph, pa)    
+    return result
 
 def list_collations(report_data):
     """
@@ -202,6 +202,13 @@ def list_high_low(l):
     Takes a numeric list; returns a tuple: highest, lowest entries.
     """
     return (min(l), max(l))
+
+
+def list_high_low_avg(l):
+    """
+    Takes a numeric list; returns a tuple: highest, lowest entries.
+    """
+    return ( min(l), max(l), sum(l) // len(l) )
 
 
 def averages(data, n=None):
@@ -333,4 +340,4 @@ if __name__ == '__main__':
             report_data = array_from_file(report_file)
             print(report_format
                 .format(**dict_for_display(report_data)))
-
+             
