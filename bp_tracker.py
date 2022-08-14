@@ -243,7 +243,7 @@ def display_averages(averages):
 if __name__ == '__main__':
 #   report_file = DEFAULT_REPORT_FILE 
 
-    # argparser:
+    # argparser:  Propose making it its own function- return <args>.
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "-a", "--add",
@@ -266,7 +266,7 @@ if __name__ == '__main__':
     # so far we have only 'add', 'file' and 'averages'
     ## Modify data file prn and ..
     ## Notify user which data file is being used:
-    if args.file:
+    if args.file:  # Suggest a separate function (ie chg_file_cmd)
         # Dealing with data file.
         # Expect in future this option will mofify the
         # config file and exit.  i.e. reset the data file
@@ -280,7 +280,8 @@ if __name__ == '__main__':
             .format(report_file))
 
     # User wants to add data:
-    if args.add:
+    if args.add:  # suggest replace code in this if clause with a func
+        #                           <add_cmd>
         # This format allows sequencing now and parsing later.
         if check_file(report_file, 'w'):
             timestamp   = datetime.now().strftime("%Y%m%d.%H%M")
@@ -302,7 +303,7 @@ if __name__ == '__main__':
                 get_category(dia, 'd')
                 ))
     # User wants averages displayed:
-    elif args.averages:
+    elif args.averages:   # suggest replacing with func <avgs_cmd>
         if not check_file(report_file, 'r'):
             print("Unable to find ", report_file)
             sys.exit(1)
@@ -326,7 +327,9 @@ if __name__ == '__main__':
             .format(n) +
             "{:.0f}/{:.0f}  {:.0f}"
             .format(*avgs))
-    else: 
+    else:   #  suggest format_data_cmd
+        # we already have a report function that is not a player
+        # in this code and perhaps should be renamed.
         # Default behavior is to report.
 #       print("...going to default behaviour...")
         if check_file(report_file, 'r'):
