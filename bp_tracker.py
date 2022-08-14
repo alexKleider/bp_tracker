@@ -334,6 +334,12 @@ if __name__ == '__main__':
             .format(n) +
             "{:.0f}/{:.0f}  {:.0f}"
             .format(*avgs))
+        print("AHA category: {} / {}"
+            .format(
+                get_category(avgs[0], 's'),
+                get_category(avgs[1], 'd')
+                ))
+
     else:   #  suggest format_data_cmd
         # we already have a report function that is not a player
         # in this code and perhaps should be renamed.

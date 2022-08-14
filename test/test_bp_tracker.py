@@ -257,6 +257,8 @@ class TestBpTracker(unittest.TestCase):
         # This one is a little trickier, but you just pass in data,
         # capture the output, split the output into a list of lines,
         # then test each line.
+        #? why not simply assert results == expected
+        #? rather than the two last lines??
           
         expected = [
             "          | Low  | High | Avg  |",
@@ -277,6 +279,7 @@ class TestBpTracker(unittest.TestCase):
         # Pass in hard coded data, test the result values.
         pass
 
+
     def test_dict_for_display(self):
         # Pass in hard coded data, test the result values.
         pass
@@ -293,19 +296,23 @@ class TestBpTracker(unittest.TestCase):
         for l in lists:
             self.assertEqual(bp_tracker.list_average(l[0]), l[1])
 
+
     def test_list_high_low(self):
         # Pass in hard coded data, test the result values.
         pass
+
 
     def test_averages(self):
         # Pass in hard coded data, test the result values.
         pass
 
+
     def test_display_averages(self):
         # Pass in hard coded data, test the result.
         pass
 
-redact = '''
+
+redact = '''  # We should run the following once in awhile!
 class TestTestsAreRun(unittest.TestCase):
     def test_testing(self):
         print('In test_testing: about to fail!')
