@@ -137,9 +137,9 @@ def format_report(systolics, diastolics, pulses, style = report_format_2):
     return a string for printing.
     TODO: Allow for different report formats.
     """
-    sl, sh, sa = list_high_low_avg(systolics)
-    dl, dh, da = list_high_low_avg(diastolics)
-    pl, ph, pa = list_high_low_avg(pulses)
+    sl, sh, sa = list_low_high_avg(systolics)
+    dl, dh, da = list_low_high_avg(diastolics)
+    pl, ph, pa = list_low_high_avg(pulses)
     
     result = style.format(sl, sh, sa, dl, dh, da, pl, ph, pa)    
     return result
@@ -175,14 +175,14 @@ def dict_for_display(report_data):
     """
     systolics, diastolics, pulses = list_collations(report_data)
     res = {}
-    res['sl'] = list_high_low(systolics)[0]
-    res['sh'] = list_high_low(systolics)[1]
+    res['sl'] = list_low_high(systolics)[0]
+    res['sh'] = list_low_high(systolics)[1]
     res['sa'] = list_average(systolics)
-    res['dl'] = list_high_low(diastolics)[0]
-    res['dh'] = list_high_low(diastolics)[1]
+    res['dl'] = list_low_high(diastolics)[0]
+    res['dh'] = list_low_high(diastolics)[1]
     res['da'] = list_average(diastolics) 
-    res['pl'] = list_high_low(pulses)[0]
-    res['ph'] = list_high_low(pulses)[1]
+    res['pl'] = list_low_high(pulses)[0]
+    res['ph'] = list_low_high(pulses)[1]
     res['pa'] = list_average(pulses) 
     return res
 
@@ -197,16 +197,16 @@ def list_average(l):
     return average
 
 
-def list_high_low(l):
+def list_low_high(l):
     """
-    Takes a numeric list; returns a tuple: highest, lowest entries.
+    Takes a numeric list; returns a tuple of lowest and highest entries.
     """
     return (min(l), max(l))
 
 
-def list_high_low_avg(l):
+def list_low_high_avg(l):
     """
-    Takes a numeric list; returns a tuple: highest, lowest entries.
+    Takes a numeric list; returns a tuple: lowest, highest, and average entries.
     """
     return ( min(l), max(l), sum(l) // len(l) )
 

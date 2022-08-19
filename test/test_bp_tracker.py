@@ -277,12 +277,34 @@ class TestBpTracker(unittest.TestCase):
 
     def test_list_collations(self):
         # Pass in hard coded data, test the result values.
-        pass
-
+        data = [ 
+            [ 100, 80, 60 ],
+            [ 110, 90, 70 ],
+            [ 120, 100, 80 ],
+        ]
+        first, second, third = bp_tracker.list_collations(data)
+        self.assertTrue(first == [100, 110, 120]) 
+        self.assertTrue(second == [80, 90, 100])
+        self.assertTrue(third  == [60, 70, 80])
 
     def test_dict_for_display(self):
         # Pass in hard coded data, test the result values.
-        pass
+        data = [ 
+            [ 100, 80, 60 ],
+            [ 110, 90, 70 ],
+            [ 120, 100, 80 ],
+        ]
+        result = bp_tracker.dict_for_display(data)
+        self.assertTrue(result['sl'] == 100)
+        self.assertTrue(result['sh'] == 120)
+        self.assertTrue(result['sa'] == 110)
+        self.assertTrue(result['dl'] == 80)
+        self.assertTrue(result['dh'] == 100)
+        self.assertTrue(result['da'] == 90)
+        self.assertTrue(result['pl'] == 60)
+        self.assertTrue(result['ph'] == 80)
+        self.assertTrue(result['pa'] == 70)
+
 
 
     def test_list_average(self):
@@ -297,19 +319,25 @@ class TestBpTracker(unittest.TestCase):
             self.assertEqual(bp_tracker.list_average(l[0]), l[1])
 
 
-    def test_list_high_low(self):
+    def test_list_low_high(self):
         # Pass in hard coded data, test the result values.
-        pass
+        self.assertTrue((70, 90) == bp_tracker.list_low_high([70, 80, 90]))
+
+    def test_list_low_high_avg(self):
+        # Pass in hard coded data, test the result values.
+        self.assertTrue((70, 90, 80) == bp_tracker.list_low_high_avg([70, 80, 90]))
 
 
     def test_averages(self):
         # Pass in hard coded data, test the result values.
-        pass
+        self.assertTrue(80 == bp_tracker.list_average([70, 80, 90]))
 
 
     def test_display_averages(self):
         # Pass in hard coded data, test the result.
-        pass
+        expected = '110.0/90.0 70.0'
+        result = bp_tracker.display_averages([110, 90, 70]) 
+        self.assertTrue(result == expected)
 
 
 redact = '''  # We should run the following once in awhile!
