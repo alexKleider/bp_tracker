@@ -1,10 +1,6 @@
 #!/usr/bin/env python3
 
-<<<<<<< HEAD
-# File: AHACategory.py  
-=======
 # File: dev/category.py
->>>>>>> issue_012
 
 """
 Provides get_category(bp_value, systolic_or_diastolic)

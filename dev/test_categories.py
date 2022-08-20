@@ -2,7 +2,7 @@
 
 # File: test_categories.py
 
-import category
+from dev import category
 
 TEST_DATA = 'bp_test_data'
 
