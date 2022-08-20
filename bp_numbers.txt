@@ -1,4 +1,5 @@
 # bp_numbers.txt
+# systolic, diastolic, pulse, time stamp
 134 68 75 20220630.0929
 136 67 73 20220630.0941
 143 66 73 20220630.1049
