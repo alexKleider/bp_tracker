@@ -26,7 +26,10 @@ import os
 
 from dev.category import get_category
 
-report_file = 'bp_numbers.txt'
+# Why do we even have to specify this?
+# Let's just set it as a default in argparse!
+# In any event it's a bad name! It's a data file not a report file.
+global_report_file = 'bp_numbers.txt'
 
 report_format ="""
            | Low  | High | Avg  |
@@ -247,10 +250,7 @@ def display_averages(averages):
             .format(*averages))
 
 
-if __name__ == '__main__':
-#   report_file = DEFAULT_REPORT_FILE 
-
-    # argparser:  Propose making it its own function- return <args>.
+def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "-a", "--add",
@@ -259,7 +259,8 @@ if __name__ == '__main__':
         )
     parser.add_argument(
         "-f", "--file",
-        help = "Report file (default data/bp_numbers.txt)",
+        help = "Report file (default bp_numbers.txt)",
+        default=global_report_file
         )
     parser.add_argument(
         "-v", "--averages",
@@ -267,86 +268,105 @@ if __name__ == '__main__':
         help = "Report average of last n values, 0 for all",
         default=0,
         )
-    args    = parser.parse_args()
+    return parser.parse_args()
 
+
+def set_data_file(args):
+    """
+    Modify data file prn and ..
+    Notify user which data file is being used:
+    """
+    if args.file == global_report_file:
+        print("Using '{}' as data file."
+            .format(global_report_file))
+    else:
+        print("Reassigned data file to '{}'."
+                .format(args.file))
+
+def add_cmd(args):
+    # This format allows sequencing now and parsing later.
+    if check_file(args.file, 'w'):
+        timestamp   = datetime.now().strftime("%Y%m%d.%H%M")
+        this_report = args.add
+        this_report.append(timestamp) 
+        #! replace next two lines with store_report function
+        with open(args.file, 'a') as file:
+            file.write("{} {} {} {}\n".format(*this_report))
+    else:
+        print("Unable to write to", args.file)
+        sys.exit(1)
+#       print(this_report)
+    sys, dia, pulse, date = this_report
+    print("Recording BP of {}/{} classified as"
+        .format(sys, dia))
+    print("{} / {}"
+        .format(
+            get_category(sys, 's'),
+            get_category(dia, 'd')
+            ))
+
+
+def averages_cmd(args):
+    if not check_file(args.file, 'r'):
+        print("Unable to find ", args.file)
+        sys.exit(1)
+    n = int(args.averages[0])
+    data = array_from_file(args.file)
+    l = len(data)
+    redacted = """
+    if l == 0:
+        print("No readings to report!")
+        sys.exit()
+    """  # already checked that file isn't empty!
+    if (n > l) or (n < 1) : n = l
+    try:
+        avgs = averages(data, n)
+    except ValueError:
+        print("Bad data found in file")
+        sys.exit()
+    print(
+        "Average valuess (sys/dia pulse)" +
+        "of last {} readings are ...\n"
+        .format(n) +
+        "{:.0f}/{:.0f}  {:.0f}"
+        .format(*avgs))
+    print("AHA category: {} / {}"
+        .format(
+            get_category(avgs[0], 's'),
+            get_category(avgs[1], 'd')
+            ))
+
+
+def format_data_cmd(args):
+    if check_file(args.file, 'r'):
+        report_data = array_from_file(args.file)
+        print(report_format
+            .format(**dict_for_display(report_data)))
+
+
+def main():
+    args = get_args()
+
+    set_data_file(args)
     # deal with arguments collected by argparser:
     # so far we have only 'add', 'file' and 'averages'
-    ## Modify data file prn and ..
-    ## Notify user which data file is being used:
-    if args.file:  # Suggest a separate function (ie chg_file_cmd)
-        # Dealing with data file.
-        # Expect in future this option will mofify the
-        # config file and exit.  i.e. reset the data file
-        # For the time being it provides a way of reading or
-        # adding data from/to a non default file.
-        report_file = args.file
-        print("Reassigned data file to '{}'."
-                .format(report_file))
+
+    if args.add:  # User wants to add data:
+        add_cmd(args)
+
+    elif args.averages:
+        averages_cmd(args)
+
     else:
-        print("Using '{}' as data file."
-            .format(report_file))
-
-    # User wants to add data:
-    if args.add:  # suggest replace code in this if clause with a func
-        #                           <add_cmd>
-        # This format allows sequencing now and parsing later.
-        if check_file(report_file, 'w'):
-            timestamp   = datetime.now().strftime("%Y%m%d.%H%M")
-            this_report = args.add
-            this_report.append(timestamp) 
-            #! replace next two lines with store_report function
-            with open(report_file, 'a') as file:
-                file.write("{} {} {} {}\n".format(*this_report))
-        else:
-            print("Unable to write to", report_file)
-            sys.exit(1)
-#       print(this_report)
-        sys, dia, pulse, date = this_report
-        print("Recording BP of {}/{} classified as"
-            .format(sys, dia))
-        print("{} / {}"
-            .format(
-                get_category(sys, 's'),
-                get_category(dia, 'd')
-                ))
-    # User wants averages displayed:
-    elif args.averages:   # suggest replacing with func <avgs_cmd>
-        if not check_file(report_file, 'r'):
-            print("Unable to find ", report_file)
-            sys.exit(1)
-        n = int(args.averages[0])
-        data = array_from_file(report_file)
-        l = len(data)
-        redacted = """
-        if l == 0:
-            print("No readings to report!")
-            sys.exit()
-        """  # already checked that file isn't empty!
-        if (n > l) or (n < 1) : n = l
-        try:
-            avgs = averages(data, n)
-        except ValueError:
-            print("Bad data found in file")
-            sys.exit()
-        print(
-            "Average valuess (sys/dia pulse)" +
-            "of last {} readings are ...\n"
-            .format(n) +
-            "{:.0f}/{:.0f}  {:.0f}"
-            .format(*avgs))
-        print("AHA category: {} / {}"
-            .format(
-                get_category(avgs[0], 's'),
-                get_category(avgs[1], 'd')
-                ))
-
-    else:   #  suggest format_data_cmd
         # we already have a report function that is not a player
         # in this code and perhaps should be renamed.
         # Default behavior is to report.
 #       print("...going to default behaviour...")
-        if check_file(report_file, 'r'):
-            report_data = array_from_file(report_file)
-            print(report_format
-                .format(**dict_for_display(report_data)))
+        format_data_cmd(args)
+
+
              
+
+if __name__ == '__main__':
+    main()
+
