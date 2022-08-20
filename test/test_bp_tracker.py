@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# File tests.py
+# File test/tests.py
 
 import os
 import os.path

@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 
+<<<<<<< HEAD
 # File: AHACategory.py  
+=======
+# File: dev/category.py
+>>>>>>> issue_012
 
 """
 Provides get_category(bp_value, systolic_or_diastolic)
@@ -13,24 +17,26 @@ https://healthiack.com/wp-content/uploads/blood-pressure-chart-80.jpg
 The 'main' code shows that many (?most) readings can't be classified,
 i.e. systolic and diastolic values don't both fall into the same
 category.
+/home/alex/Git/LH/bp_tracker/dev/
 """
 
 import sys
 
+# s == systolic values; d == diastolic values
+s =  (50, 70, 90, 100, 121, 130, 140, 160, 180, 211, )
+d = (35, 40, 60,  65,  81,  85,  90, 100, 110, 121, )
 
-systolics =  (50, 70, 90, 100, 121, 130, 140, 160, 180, 210, )
-diastolics = (35, 40, 60,  65,  81,  85,  90, 100, 110, 120, )
-categories = ('extreme hypotension',  # Testual description
-              'severe hypotension',   # of AHA categories.
-              'moderate hpyotension',
-              'low normal blood pressure',
-              'ideal blood pressure',
-              'high normal blood pressure',
-              'pre-hypertension',
-              'stage 1 hypertension',
-              'stage 2 hypertension',
-              'stage 3 hypertension',
-              'hypertensive crisis',
+categories = ('extreme hypotension',        # 0
+              'severe hypotension',         # 1
+              'moderate hpyotension',       # 2
+              'low normal blood pressure',  # 3
+              'ideal blood pressure',       # 4
+              'high normal blood pressure', # 5
+              'pre-hypertension',           # 6
+              'stage 1 hypertension',       # 7
+              'stage 2 hypertension',       # 8
+              'stage 3 hypertension',       # 9
+              'hypertensive crisis',        #10
              )
 
 
@@ -89,7 +95,34 @@ test_data = (  # a subset of my readings
     )
 
 
-def main():
+def get_category(bp, sord):
+    """
+    Given:
+        <bp> (a single (systolic or diastolic) reading)
+      & <sord> (any word that begins with either an 's' or a 'd',
+        specifiying use of systolic or diastolic scale:
+    returns a category.
+    """
+    if sord.startswith('s'):
+        sord = s
+    elif sord.startswith('d'):
+        sord = d
+    else:
+        print("Must specify systolic or diastolic.")
+        sys.exit()
+    for n in range(len(sord)):
+        category = categories[n]
+        if int(bp) < sord[n]:
+            return categories[n]
+    return categories[-1]
+
+
+def show_missmatches():
+    """
+    Shows that in most instances (of my readings)
+    the systolic and the diastolic readings don't
+    both fall into the same AHA category.
+    """
     matches = missmatches = 0
     for item in test_data:
         systolic = item[0]
@@ -98,7 +131,9 @@ def main():
         dia_category = get_category(diastolic, 'd')
         if sys_category == dia_category:
             matches += 1
-            addendum = '<match>'
+            print("{}/{} fits '{}'"
+                    .format(systolic, diastolic,
+                        sys_category))
         else:
             missmatches += 1
             addendum = ''
@@ -108,4 +143,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    show_missmatches()

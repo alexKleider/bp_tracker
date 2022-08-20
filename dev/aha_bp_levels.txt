@@ -1,4 +1,10 @@
-# Blood Pressure Category ('aha_bp_levels.txt')
+# Blood Pressure Category ('bpc.txt')
+# /home/alex/Git/LH/bp_tracker/dev/aha_bp_levels.txt
+
+# https://healthiack.com/wp-content/uploads/blood-pressure-chart-80.jpg
+# wget <the above> ==>
+# file:///home/alex/Git/LH/bp_tracker/dev/blood-pressure-chart-80.jpg
+
 
 CATEGORY               MINIMUM   MAXIMUM
 
