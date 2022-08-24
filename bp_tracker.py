@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+#Alex working on issue_013#
+
 # name:     bp_tracker.py
 # version:  0.0.1
 # date:     20220509
@@ -20,15 +22,7 @@ import argparse
 from datetime import datetime
 import os
 
-# Making this a global constant for now:
-# in future will probably read a config file to set this global..
-#DEFAULT_REPORT_FILE = "data/bp_numbers.txt"
-
-from dev.category import get_category
-
-# Why do we even have to specify this?
-# Let's just set it as a default in argparse!
-# In any event it's a bad name! It's a data file not a report file.
+#?! A bad name! It's a data file not a report file.
 global_report_file = 'bp_numbers.txt'
 
 report_format ="""
@@ -297,13 +291,15 @@ def add_cmd(args):
         sys.exit(1)
 #       print(this_report)
     sys, dia, pulse, date = this_report
-    print("Recording BP of {}/{} classified as"
+#? Yet to determine if we want extra analysis of data
+#?  print("Recording BP of {}/{} classified as"
+    print("Recording BP of {}/{}."
         .format(sys, dia))
-    print("{} / {}"
-        .format(
-            get_category(sys, 's'),
-            get_category(dia, 'd')
-            ))
+#?  print("{} / {}"
+#?      .format(
+#?          get_category(sys, 's'),
+#?          get_category(dia, 'd')
+#?          ))
 
 
 def averages_cmd(args):
@@ -330,11 +326,12 @@ def averages_cmd(args):
         .format(n) +
         "{:.0f}/{:.0f}  {:.0f}"
         .format(*avgs))
-    print("AHA category: {} / {}"
-        .format(
-            get_category(avgs[0], 's'),
-            get_category(avgs[1], 'd')
-            ))
+#? The following may be deleted if we don't want the 'analysis'
+#   print("AHA category: {} / {}"
+#       .format(
+#           get_category(avgs[0], 's'),
+#           get_category(avgs[1], 'd')
+#           ))
 
 
 def format_data_cmd(args):
