@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-#Alex working on issue_013#
+#Alex working on temp#
 
 # name:     bp_tracker.py
 # version:  0.0.1
@@ -345,13 +345,11 @@ def main():
     args = get_args()
 
     set_data_file(args)
-    # deal with arguments collected by argparser:
-    # so far we have only 'add', 'file' and 'averages'
 
     if args.add:  # User wants to add data:
         add_cmd(args)
 
-    elif args.averages:
+    elif args.averages:  # User wants average of latest readings:
         averages_cmd(args)
 
     else:
