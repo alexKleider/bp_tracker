@@ -56,7 +56,7 @@ def get_category(bp, s_or_d, categories=categories):
     try: bp = int(bp)
     except (ValueError, TypeError):
         print(
-        "{} not an integer (parameter of get_category function"
+        "{} not an integer (parameter of get_category function)"
             .format(bp))
         sys.exit()
     if s_or_d and isinstance(s_or_d, str):

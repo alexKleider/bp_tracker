@@ -27,6 +27,7 @@ global_report_file = 'bp_numbers.txt'
 
 report_format ="""
            | Low  | High | Avg  |
+           | ---  | ---- | ---  |
 Systolic ..|{sl:^6}|{sh:^6}|{sa:^6}|
 Diastolic .|{dl:^6}|{dh:^6}|{da:^6}|
 Pulse .....|{pl:^6}|{ph:^6}|{pa:^6}|

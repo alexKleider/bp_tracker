@@ -29,25 +29,26 @@ def get_status(sys, dia):
     Hypertensive crisis             >180      or       >110
     (where emergency care is required)
     """
-    if sys < 120 and dia < 80: return 'normal'
+    if sys < 120 and dia < 80: return 'Normal BP'
     if (sys >=120 and sys <140) or (dia >=80 and dia < 90):
-        return 'pre'
+        return 'Pre-hypertension'
     if (sys >=140 and sys <160) or (dia >=80 and dia <= 99):
-        return 'stage I'
+        return 'Stage I hypertension'
     if (sys >=160 and sys <180) or (dia >=100 and dia <= 110):
-        return 'stage II'
-    if sys > 180 or dia > 110: return 'crisis'
+        return 'Stage II hypertension'
+    if sys > 180 or dia > 110: return 'Hypertensive crisis'
     assert False
 
-test_data = ((115, 70, 85, 45, 'normal'),
-             (127, 85, 99, 42, 'pre'),
-             (145, 93, 110,52, 'stage I'),
-             (170, 104,126,66, 'stage II'),
+test_data = ((115, 70, 85, 45, 'Normal BP'),
+             (127, 85, 99, 42, 'Pre-hypertension'),
+             (145, 93, 110,52, 'Stage I hypertension'),
+             (170, 104,126,66, 'Stage II hypertension'),
+             (200, 112,141,88, 'Hypertensive crisis'),
             )
 
 def calc(sys, dia):
     sys, dia = int(sys), int(dia)
-    mean = (2 * dia + sys)/3
+    mean = round((2 * dia + sys)/3)
     pp = sys - dia
     status = get_status(sys, dia)
     return mean, pp, status
@@ -55,16 +56,22 @@ def calc(sys, dia):
 
 def show_calc(sys, dia):
     mean, pp, status = calc(sys, dia)
-    return f"Mean BP: {mean:.0f}, Pulse pressure: {pp}, Status: {status}"
+    return f"Mean BP: {mean}, Pulse pressure: {pp}, Status: {status}"
 
 
 if __name__ == '__main__':
+    ok = True
     for sys, dia, mean, pp, status in test_data:
         res = calc(sys, dia)
         try:
             assert res == (mean, pp, status,)
         except AssertionError:
+            ok = False
             print(
             f"calc({sys}, {dia}) => {res} NOT ({mean}, {pp}, {status})")
-    print("Test completed")
+    if ok:
+        print("Test completed successfully.")
+    else:
+        print("Errors described above.")
+
 
