@@ -75,3 +75,9 @@ if __name__ == '__main__':
         print("Errors described above.")
 
 
+presentation = '''
+          Current   State                Average    State
+systolic      151   Hypertension             156    {:<22}
+diastolic      79   Normal                    85    {:<22}
+mean
+'''   # as proposed by Leam week of Aug 22nd
