@@ -191,7 +191,7 @@ def list_average(l):
     expressed as an integer.
     """
     if not l: return 0  # list might be empty!
-    average = sum(l) // len(l)
+    average = round(sum(l) / len(l))
     return average
 
 
@@ -234,7 +234,7 @@ def averages(data, n=None):
         sys_sum += int(vals[0])
         dia_sum += int(vals[1])
         pul_sum += int(vals[2])
-    return sys_sum/n, dia_sum/n, pul_sum/n
+    return [round(val/n) for val in (sys_sum, dia_sum, pul_sum)]
 
 
 def display_averages(averages):
