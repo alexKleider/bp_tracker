@@ -3,22 +3,21 @@
 # File: aha.py  (for American Heart Association)
 
 """
-Re: what used to be category.py:
-Provides get_category(bp_value, systolic_or_diastolic)
-which returns an American Heart Association blood pressure category.
+An amalgamation of what used to be category.py and calculate.py.
 
-"systolics", "diastolics" and "categories" are taken from
+"cat..." deals with a BP 'class' depending on whether systolic or
+diastolic pressure is provided. i.e. each (sys vs dia) is classified
+separately.) Provides get_category(bp_value, systolic_or_diastolic.)
 https://healthiack.com/wp-content/uploads/blood-pressure-chart-80.jpg
 (which I believe are from the American Heart Association.)
+See categories.txt
+Note: more often than not systolic and diastolic values don't both fall
+into the same category. (see 'main' code)
+Hence the use of the next set of utilities...
 
-The 'main' code shows that many (?most) readings can't be classified,
-i.e. systolic and diastolic values don't both fall into the same
-category.
-/home/alex/Git/LH/bp_tracker/dev/
-
-Re: what used to be calculate.py:
-Begin implementing a 'calculator' as described here:
+"calc..."  does some calculations as defined @ 
 https://www.thecalculator.co/health/Blood-Pressure-Calculator-487.html
+Using formulas provided by the AHA we get a 'unified' classification.
 
 The mean arterial pressure (MAP) formula is:
 MAP ≈ [(2*DP) + SP]/3
@@ -30,16 +29,17 @@ PP = SP – DP
 
 import sys
 
+# Numeric representation of the criteria used to
+# classify blood pressure readings:
 # s == systolic values; d == diastolic values
 s =  (50, 70, 90, 100, 121, 130, 140, 160, 180, 211, )
 d = (35, 40, 60,  65,  81,  85,  90, 100, 110, 121, )
-
 categories = ('extreme hypotension',        # 0
               'severe hypotension',         # 1
               'moderate hypotension',       # 2
-              'low normal BP',  # 3
-              'ideal BP',       # 4
-              'high normal BP', # 5
+              'low normal BP',              # 3
+              'ideal BP',                   # 4
+              'high normal BP',             # 5
               'pre-hypertension',           # 6
               'stage 1 hypertension',       # 7
               'stage 2 hypertension',       # 8
@@ -48,75 +48,12 @@ categories = ('extreme hypotension',        # 0
              )
 
 
-def get_category(bp, s_or_d, categories=categories):
-    """
-    Given <bp> (a reading)
-    specified as <s_or_d> (systolic or diastolic)
-    returns a category.
-    <bp> must be something that can be turned into an int.
-    <s_or_d> must be a string beginning in either 's' for systolic
-    or 'd' for diastolic.
-    <categories> is a parameter incase the user wants to use a
-    different set of descriptors.
-    """
-
-    def terminate():
-        print(
-        "unacceptable <s_or_d> parmeter for get_category function")
-        sys.exit()
-
-    try: bp = int(bp)
-    except (ValueError, TypeError):
-        print(
-        "{} not an integer (parameter of get_category function)"
-            .format(bp))
-        sys.exit()
-    if s_or_d and isinstance(s_or_d, str):
-        if s_or_d[0] in {'s', 'S'}:
-            sord = systolics
-        elif s_or_d[0] in {'d', 'D'}:
-            sord = diastolics
-        else: terminate()
-    else: terminate()
-    for n in range(len(sord)):
-        category = categories[n]
-        if bp < sord[n]:
-            return categories[n]
-    return categories[-1]
-
-
-readings = (  # a subset of my readings
-        (145, 67),
-        (123, 64),
-        (124, 56),
-        (137, 74),
-        (132, 64),
-        (166, 78),
-        (116, 65),
-        (163, 70),
-        (189, 90),
-        (171, 83),
-        (131, 66),
-        (117, 69),
-        (116, 62),
-        (250, 130),  # fictional reading
-        (110, 61),
-        (128, 63),
-        (141, 70),
-        (155, 67),
-        (144, 73),
-        (124, 66),
-        (121, 64),
-        (123, 66),
-    )
-
-
 def get_category(bp, sord):
     """
     Given:
-        <bp> (a single (systolic or diastolic) reading)
-      & <sord> (any word that begins with either an 's' or a 'd',
-        specifiying use of systolic or diastolic scale:
+        <bp>: a single (systolic or diastolic) reading.
+      & <sord>: a string that begins with an 's' or a 'd',
+        to specifiy if <bp> is systolic or diastolic:
     returns a category.
     """
     if sord.startswith('s'):
@@ -132,37 +69,6 @@ def get_category(bp, sord):
             return categories[n]
     return categories[-1]
 
-
-def show_missmatches(test_data):
-    """
-    Shows that in most instances (of my readings)
-    the systolic and the diastolic readings don't
-    both fall into the same AHA category.
-    """
-    nmatches = nmissmatches = 0
-    matches = []
-    missmatches = []
-    for item in test_data:
-        systolic = item[0]
-        diastolic = item[1]
-        sys_category = get_category(systolic, 's')
-        dia_category = get_category(diastolic, 'd')
-        if sys_category == dia_category:
-            nmatches += 1
-            matches.append("{}/{} fits '{}'"
-                    .format(systolic, diastolic,
-                        sys_category))
-        else:
-            nmissmatches += 1
-            addendum = ''
-            missmatches.append("{}/{}: {} / {}  {}"
-                .format(systolic, diastolic,
-                    sys_category, dia_category, addendum))
-    print(
-      f"Result: {nmatches} matches and {nmissmatches} missmatches")
-    both = matches + missmatches
-    for res in both:
-        print(res)
 
 # -------  calculate  -----------#
 
@@ -191,13 +97,6 @@ def get_unified_status(sys, dia):
     if sys > 180 or dia > 110: return 'Hypertensive crisis'
     assert False
 
-test_data = ((115, 70, 85, 45, 'Normal BP'),
-             (127, 85, 99, 42, 'Pre-hypertension'),
-             (145, 93, 110,52, 'Stage I hypertension'),
-             (170, 104,126,66, 'Stage II hypertension'),
-             (200, 112,141,88, 'Hypertensive crisis'),
-            )
-
 def calc(sys, dia):
     sys, dia = int(sys), int(dia)
     mean = round((2 * dia + sys)/3)
@@ -213,8 +112,73 @@ def show_calc(sys, dia):
 
 if __name__ == '__main__':   # calculator
 
-    show_missmatches(readings)  # category 
+    def show_missmatches(test_data):
+        """
+        Shows that in most instances (of my readings)
+        the systolic and the diastolic readings don't
+        both fall into the same AHA category.
+        """
+        nmatches = nmissmatches = 0
+        matches = []
+        missmatches = []
+        for item in test_data:
+            systolic = item[0]
+            diastolic = item[1]
+            sys_category = get_category(systolic, 's')
+            dia_category = get_category(diastolic, 'd')
+            if sys_category == dia_category:
+                nmatches += 1
+                matches.append("{}/{} fits '{}'"
+                        .format(systolic, diastolic,
+                            sys_category))
+            else:
+                nmissmatches += 1
+                addendum = ''
+                missmatches.append("{}/{}: {} / {}  {}"
+                    .format(systolic, diastolic,
+                        sys_category, dia_category, addendum))
+        print(
+          f"Result: {nmatches} matches and {nmissmatches} missmatches")
+        both = matches + missmatches
+        for res in both:
+            print(res)
 
+
+    readings = (  # a subset of my readings
+        (145, 67),# used for testing
+        (123, 64),
+        (124, 56),
+        (137, 74),
+        (132, 64),
+        (166, 78),
+        (116, 65),
+        (163, 70),
+        (189, 90),
+        (171, 83),
+        (131, 66),
+        (117, 69),
+        (116, 62),
+        (250, 130),  # fictional reading
+        (110, 61),
+        (128, 63),
+        (141, 70),
+        (155, 67),
+        (144, 73),
+        (124, 66),
+        (121, 64),
+        (123, 66),
+    )
+    show_missmatches(readings)  # category 
+    # the above demonstrates that for many/most readings
+    # the classification regarding systolic vs diastolic
+    # do not match!
+
+    test_data = ((115, 70, 85, 45, 'Normal BP'),
+             (127, 85, 99, 42, 'Pre-hypertension'),
+             (145, 93, 110,52, 'Stage I hypertension'),
+             (170, 104,126,66, 'Stage II hypertension'),
+             (200, 112,141,88, 'Hypertensive crisis'),
+            )
     ok = True
     for sys, dia, mean, pp, status in test_data:
         res = calc(sys, dia)

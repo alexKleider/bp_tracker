@@ -1,11 +1,16 @@
 #!/usr/bin/env python3
 
-# File: test_categories.py
+# File: test_aha.py
 
-#from dev import aha
+import os
 import aha
 
-TEST_DATA = 'dev/bp_test_data'
+cwd = os.getcwd()
+print(cwd)
+if cwd.endswith('dev'):
+    TEST_DATA = 'bp_test_data'
+else:
+    TEST_DATA = 'dev/bp_test_data'
 
 def test_translation():
     with open(TEST_DATA, 'r') as instream:
