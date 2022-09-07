@@ -5,9 +5,8 @@
 """
 An amalgamation of what used to be category.py and calculate.py.
 
-"cat..." deals with a BP 'class' depending on whether systolic or
-diastolic pressure is provided. i.e. each (sys vs dia) is classified
-separately.) Provides get_category(bp_value, systolic_or_diastolic.)
+The "Category" section deals with individual (systolic or diastolic)
+values and assigns the appropriate AHA classification.
 https://healthiack.com/wp-content/uploads/blood-pressure-chart-80.jpg
 (which I believe are from the American Heart Association.)
 See categories.txt
@@ -15,16 +14,14 @@ Note: more often than not systolic and diastolic values don't both fall
 into the same category. (see 'main' code)
 Hence the use of the next set of utilities...
 
-"calc..."  does some calculations as defined @ 
+The "Calculate" section  does some calculations as defined @ 
 https://www.thecalculator.co/health/Blood-Pressure-Calculator-487.html
 Using formulas provided by the AHA we get a 'unified' classification.
 
 The mean arterial pressure (MAP) formula is:
 MAP ≈ [(2*DP) + SP]/3
 
-The pulse pressure (PP) formula used is:
-PP = SP – DP
-
+Pulse pressure is the difference between systolic and diastolic.
 """
 
 import sys
@@ -72,7 +69,7 @@ def get_category(bp, sord):
 
 # -------  calculate  -----------#
 
-def get_unified_status(sys, dia):
+def get_unified_status(sp, dp):
     """
     The calculator returns the blood pressure status reading based
     on the following ranges for systolic and diastolic presures:
@@ -87,26 +84,26 @@ def get_unified_status(sys, dia):
     Hypertensive crisis             >180      or       >110
     (where emergency care is required)
     """
-    if sys < 120 and dia < 80: return 'Normal BP'
-    if (sys >=120 and sys <140) or (dia >=80 and dia < 90):
+    if sp < 120 and dp < 80: return 'Normal BP'
+    if (sp >=120 and sp <140) or (dp >=80 and dp < 90):
         return 'Pre-hypertension'
-    if (sys >=140 and sys <160) or (dia >=80 and dia <= 99):
+    if (sp >=140 and sp <160) or (dp >=80 and dp <= 99):
         return 'Stage I hypertension'
-    if (sys >=160 and sys <180) or (dia >=100 and dia <= 110):
+    if (sp >=160 and sp <180) or (dp >=100 and dp <= 110):
         return 'Stage II hypertension'
-    if sys > 180 or dia > 110: return 'Hypertensive crisis'
+    if sp > 180 or dp > 110: return 'Hypertensive crisis'
     assert False
 
-def calc(sys, dia):
-    sys, dia = int(sys), int(dia)
-    mean = round((2 * dia + sys)/3)
-    pp = sys - dia
-    status = get_unified_status(sys, dia)
+def calc(sp, dp):
+    sp, dp = int(sp), int(dp)
+    mean = round((2 * dp + sp)/3)
+    pp = sp - dp
+    status = get_unified_status(sp, dp)
     return mean, pp, status
 
 
-def show_calc(sys, dia):
-    mean, pp, status = calc(sys, dia)
+def show_calc(sp, dp):
+    mean, pp, status = calc(sp, dp)
     return f"Mean BP: {mean}, Pulse pressure: {pp}, Status: {status}"
 
 
@@ -180,14 +177,14 @@ if __name__ == '__main__':   # calculator
              (200, 112,141,88, 'Hypertensive crisis'),
             )
     ok = True
-    for sys, dia, mean, pp, status in test_data:
-        res = calc(sys, dia)
+    for sp, dp, mean, pp, status in test_data:
+        res = calc(sp, dp)
         try:
             assert res == (mean, pp, status,)
         except AssertionError:
             ok = False
             print(
-            f"calc({sys}, {dia}) => {res} NOT ({mean}, {pp}, {status})")
+            f"calc({sp}, {dp}) => {res} NOT ({mean}, {pp}, {status})")
     if ok:
         print("Test completed successfully.")
     else:

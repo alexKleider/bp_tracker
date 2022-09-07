@@ -17,10 +17,12 @@
 #   (?) Add current distance from goal?
 #   Add more tests.
 
+import os
 import sys
 import argparse
 from datetime import datetime
-import os
+import dev
+from dev import aha
 
 #?! A bad name! It's a data file not a report file.
 global_report_file = 'bp_numbers.txt'
@@ -290,17 +292,15 @@ def add_cmd(args):
     else:
         print("Unable to write to", args.file)
         sys.exit(1)
-#       print(this_report)
-    sys, dia, pulse, date = this_report
-#? Yet to determine if we want extra analysis of data
-#?  print("Recording BP of {}/{} classified as"
+    sp, dp, pulse, date = this_report
     print("Recording BP of {}/{}."
-        .format(sys, dia))
-#?  print("{} / {}"
-#?      .format(
-#?          get_category(sys, 's'),
-#?          get_category(dia, 'd')
-#?          ))
+        .format(sp, dp))
+    print("{} / {}"
+        .format(
+            dev.aha.get_category(sp, 's'),
+            dev.aha.get_category(dp, 'd')
+            ))
+    print(dev.aha.show_calc(sp,dp))
 
 
 def averages_cmd(args):
@@ -321,18 +321,19 @@ def averages_cmd(args):
     except ValueError:
         print("Bad data found in file")
         sys.exit()
+    sp, dp = avgs[:2]
     print(
         "Average valuess (sys/dia pulse)" +
         "of last {} readings are ...\n"
         .format(n) +
         "{:.0f}/{:.0f}  {:.0f}"
         .format(*avgs))
-#? The following may be deleted if we don't want the 'analysis'
-#   print("AHA category: {} / {}"
-#       .format(
-#           get_category(avgs[0], 's'),
-#           get_category(avgs[1], 'd')
-#           ))
+    print("{} / {}"
+        .format(
+            dev.aha.get_category(sp, 's'),
+            dev.aha.get_category(dp, 'd')
+            ))
+    print(dev.aha.show_calc(sp,dp))
 
 
 def format_data_cmd(args):
