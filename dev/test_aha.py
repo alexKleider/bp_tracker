@@ -3,7 +3,10 @@
 # File: test_aha.py
 
 import os
-import aha
+try:
+    import aha
+except ImportError:
+    from dev import aha
 
 cwd = os.getcwd()
 print(cwd)

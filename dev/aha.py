@@ -109,15 +109,15 @@ def show_calc(sp, dp):
 
 if __name__ == '__main__':   # calculator
 
-    def show_missmatches(test_data):
+    def show_mismatches(test_data):
         """
         Shows that in most instances (of my readings)
         the systolic and the diastolic readings don't
         both fall into the same AHA category.
         """
-        nmatches = nmissmatches = 0
+        nmatches = nmismatches = 0
         matches = []
-        missmatches = []
+        mismatches = []
         for item in test_data:
             systolic = item[0]
             diastolic = item[1]
@@ -129,14 +129,14 @@ if __name__ == '__main__':   # calculator
                         .format(systolic, diastolic,
                             sys_category))
             else:
-                nmissmatches += 1
+                nmismatches += 1
                 addendum = ''
-                missmatches.append("{}/{}: {} / {}  {}"
+                mismatches.append("{}/{}: {} / {}  {}"
                     .format(systolic, diastolic,
                         sys_category, dia_category, addendum))
         print(
-          f"Result: {nmatches} matches and {nmissmatches} missmatches")
-        both = matches + missmatches
+          f"Result: {nmatches} matches and {nmismatches} mismatches")
+        both = matches + mismatches
         for res in both:
             print(res)
 
@@ -165,7 +165,7 @@ if __name__ == '__main__':   # calculator
         (121, 64),
         (123, 66),
     )
-    show_missmatches(readings)  # category 
+    show_mismatches(readings)  # category 
     # the above demonstrates that for many/most readings
     # the classification regarding systolic vs diastolic
     # do not match!

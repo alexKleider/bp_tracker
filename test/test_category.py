@@ -7,7 +7,7 @@ import os
 import sys
 sys.path.insert(0, os.path.split(sys.path[0])[0])
 
-import dev.category as category
+from dev import aha
 from test.data4category import test_data
 
 
@@ -33,8 +33,8 @@ class TestCategory(unittest.TestCase):
 #               category.get_category(datum[0], datum[1])
 #                   ))
             self.assertEqual(
-                category.get_category(datum[0], datum[1]),
-                category.categories[int(datum[2])])
+                aha.get_category(datum[0], datum[1]),
+                aha.categories[int(datum[2])])
 
 if __name__ == "__main__":
     unittest.main()

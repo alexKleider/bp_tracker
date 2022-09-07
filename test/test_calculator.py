@@ -7,7 +7,7 @@ import os.path
 import tempfile
 import unittest
 
-from dev import calculator
+from dev import aha
 
 
 class TestCalculator(unittest.TestCase):
@@ -19,7 +19,7 @@ class TestCalculator(unittest.TestCase):
 
     def test_calc(self):
         for sys, dia, mean, pp, status in self.test_data:
-            res = calculator.calc(sys, dia)
+            res = aha.calc(sys, dia)
             try:
                 self.assertEqual(res, (mean, pp, status,))
             except AssertionError:

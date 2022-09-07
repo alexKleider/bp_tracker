@@ -100,7 +100,8 @@ class TestBpTracker(unittest.TestCase):
 #       self.assertTrue(bp_tracker.check_file(test_file, 'r'))
 
         averages = collect_averages(infile)
-        self.assertEqual(tuple(averages),
+        averages = [round(avg) for avg in averages]
+        self.assertEqual(averages,
                 bp_tracker.averages(
                     bp_tracker.array_from_file(infile))
                 )
@@ -118,7 +119,8 @@ class TestBpTracker(unittest.TestCase):
 #       self.assertTrue(bp_tracker.check_file(test_file, 'r'))
 
         averages = collect_averages(infile)
-        self.assertEqual(tuple(averages),
+        averages = [round(avg) for avg in averages]
+        self.assertEqual(averages,
                 bp_tracker.averages(
                     bp_tracker.array_from_file(infile)))
 
@@ -126,7 +128,8 @@ class TestBpTracker(unittest.TestCase):
     def test_averaging_only_last_few(self):
         for n in range(7):
             averages = collect_averages(infile)[-7:]
-            self.assertEqual(tuple(averages),
+            averages = [round(avg) for avg in averages]
+            self.assertEqual(averages,
                 bp_tracker.averages(
                     bp_tracker.array_from_file(infile)), n
                 )

@@ -25,7 +25,7 @@ import dev
 from dev import aha
 
 #?! A bad name! It's a data file not a report file.
-global_report_file = 'bp_numbers.txt'
+data_file = 'bp_numbers.txt'
 
 report_format ="""
            | Low  | High | Avg  |
@@ -257,7 +257,7 @@ def get_args():
     parser.add_argument(
         "-f", "--file",
         help = "Report file (default bp_numbers.txt)",
-        default=global_report_file
+        default=data_file
         )
     parser.add_argument(
         "-v", "--averages",
@@ -273,9 +273,9 @@ def set_data_file(args):
     Modify data file prn and ..
     Notify user which data file is being used:
     """
-    if args.file == global_report_file:
+    if args.file == data_file:
         print("Using '{}' as data file."
-            .format(global_report_file))
+            .format(data_file))
     else:
         print("Reassigned data file to '{}'."
                 .format(args.file))
