@@ -16,7 +16,7 @@ Hence the use of the next set of utilities...
 
 The "Calculate" section  does some calculations as defined @ 
 https://www.thecalculator.co/health/Blood-Pressure-Calculator-487.html
-Using formulas provided by the AHA we get a 'unified' classification.
+using formulas provided by the AHA we get a 'unified' classification.
 
 The mean arterial pressure (MAP) formula is:
 MAP ≈ [(2*DP) + SP]/3
@@ -26,22 +26,23 @@ Pulse pressure is the difference between systolic and diastolic.
 
 import sys
 
-# Numeric representation of the criteria used to
-# classify blood pressure readings:
+# Numeric representation of the criteria used to classify
+# (individual single number) blood pressure readings:
 # s == systolic values; d == diastolic values
+# Note: these do _not_ correspond with the 'unified' system.
 s =  (50, 70, 90, 100, 121, 130, 140, 160, 180, 211, )
 d = (35, 40, 60,  65,  81,  85,  90, 100, 110, 121, )
-categories = ('extreme hypotension',        # 0
-              'severe hypotension',         # 1
-              'moderate hypotension',       # 2
-              'low normal BP',              # 3
-              'ideal BP',                   # 4
-              'high normal BP',             # 5
-              'pre-hypertension',           # 6
-              'stage 1 hypertension',       # 7
-              'stage 2 hypertension',       # 8
-              'stage 3 hypertension',       # 9
-              'hypertensive crisis',        #10
+categories = ('Extreme hypotension',        # 0
+              'Severe hypotension',         # 1
+              'Moderate hypotension',       # 2
+              'Low normal BP',              # 3
+              'Ideal BP',                   # 4
+              'High normal BP',             # 5
+              'Pre-hypertension',           # 6
+              'Stage I hypertension',       # 7
+              'Stage II hypertension',      # 8
+              'Stage III hypertension',     # 9
+              'Hypertensive crisis',        #10
              )
 
 
@@ -71,8 +72,9 @@ def get_category(bp, sord):
 
 def get_unified_status(sp, dp):
     """
-    The calculator returns the blood pressure status reading based
-    on the following ranges for systolic and diastolic presures:
+    The calculator returns a TEXT REPRESENTATION of AHA status
+    based on the blood pressure provided (<sp>/<dp>).
+    The rules:
     Blood Pressure Status     Systolic (mm Hg) IF  Distolic (mm Hg)
                                  Min     Max       Min     Max
     Normal Blood Pressure   	    <120      and      <80
@@ -93,6 +95,7 @@ def get_unified_status(sp, dp):
         return 'Stage II hypertension'
     if sp > 180 or dp > 110: return 'Hypertensive crisis'
     assert False
+
 
 def calc(sp, dp):
     sp, dp = int(sp), int(dp)
@@ -191,6 +194,7 @@ if __name__ == '__main__':   # calculator
         print("Errors described above.")
 
 
+# work in progress...
 presentation = '''
           Current   State                Average    State
 systolic      151   Hypertension             156    {:<22}

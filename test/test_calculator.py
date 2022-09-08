@@ -12,9 +12,9 @@ from dev import aha
 
 class TestCalculator(unittest.TestCase):
 
-    test_data = ((115, 70, 85, 45, 'normal'),
-                 (127, 85, 99, 42, 'pre'),
-                 (145, 93, 110,52, 'stage I'),
+    test_data = ((115, 70, 85, 45, 'Normal BP'),
+                 (127, 85, 99, 42, 'Pre-hypertension'),
+                 (145, 93, 110,52, 'Stage I hypertension'),
                 )
 
     def test_calc(self):
