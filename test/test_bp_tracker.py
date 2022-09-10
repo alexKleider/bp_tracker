@@ -375,12 +375,8 @@ class TestBpTracker(unittest.TestCase):
                 (145, 93, 110,52, 'Stage I hypertension'),
                 ):
             res = bp_tracker.calc(sys, dia)
-            try:
-                self.assertEqual(res, (mean, pp, status,))
-            except AssertionError:
-                print(
-                f"calc({sys}, {dia}) => {res} NOT ({mean}, {pp}, {status})")
-        print("Test completed")
+            self.assertEqual(res, (mean, pp, status,))
+
 
 redact = '''  # We should run the following once in awhile!
 class TestTestsAreRun(unittest.TestCase):
