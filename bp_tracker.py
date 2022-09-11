@@ -73,26 +73,34 @@ def useful_lines(stream, comment="#"):
 def array_from_file(report_file):
     """
     Input is the report file: four (string) values per line.[1]
-    Output is a list of 4 tuples.
+    Output is a list of 4 tuples: (int, int, int, float).
     Tuples are: systolic, diastolic, pulse, time stamp.[1]
     [1] Each of the 4 strings represents a number:
     first three are integers, last (the fourth) is a float.
     #? the last isn't really a float: it's YYYYmmdd.hhmm
     #? a string representation of a timestamp!
     """
-    data = []
     #! replace with clause with store_report function
+    def get_error_message(f, line):
+        return (
+      "Badly formated line found in input ..."
+      + "\n file: {}" .format(f)
+      + '\n"{}"'.format(line))
+    res = []
     with open(report_file, 'r') as stream:
         for line in useful_lines(stream):
-            datum = line.split()
-            if len(datum) == 4:
-                data.append(tuple(datum))
+            data = line.split()
+            if len(data) == 4:
+                try:
+                    for i in range(3):
+                        data[i] = int(data[i])
+                    data[3] = float(data[3])
+                except ValueError:
+                    print(get_error_message(report_file, line))
             else:
-                raise Exception(
-                  "Badly formated line found in input ..."
-                  + "\n file: {}" .format(report_file)
-                  + '\n"{}"'.format(line))
-    return data
+                raise Exception(get_error_message(report_file, line))
+            res.append(tuple(data))
+    return res
  
 
 def report(report_data):
@@ -151,14 +159,10 @@ def list_collations(report_data):
     systolics   = []
     diastolics  = []
     pulses      = []
-
     for datum in report_data:
         systolics.append(int(datum[0]))
         diastolics.append(int(datum[1]))
         pulses.append(int(datum[2]))
-
-#   _ = input("list_collections provides:\n" +
-#           repr((systolics, diastolics, pulses)))
     return systolics, diastolics, pulses
 
 
@@ -220,20 +224,21 @@ def averages(data, n=None):
     """
     l = len(data)
     if n:
-        if n < 0:
-            print("Number to consider can not be less than zero!")
+        if n < 1:
+            print(
+            "Number of data to consider can not be less than one!")
             assert False
-        l = len(data)
         if n > l: n = l
-        d = data[-n:]
+        data = data[-n:]
     else:
-        d = data
-        n = len(d)
+        n = l
     sys_sum = dia_sum = pul_sum = 0
-    for vals in d:
-        sys_sum += int(vals[0])
-        dia_sum += int(vals[1])
-        pul_sum += int(vals[2])
+    for vals in data:
+        sys_sum += vals[0]
+        dia_sum += vals[1]
+        pul_sum += vals[2]
+#   print((sys_sum, dia_sum, pul_sum))  # debug
+#   print(n)                            # debug
     return [round(val/n) for val in (sys_sum, dia_sum, pul_sum)]
 
 
@@ -400,10 +405,11 @@ def averages_cmd(args):
     n = int(args.averages[0])
     data = array_from_file(args.file)
     l = len(data)
-    redacted = """
+
     if l == 0:
         print("No readings to report!")
         sys.exit()
+    redacted = """
     """  # already checked that file isn't empty!
     if (n > l) or (n < 1) : n = l
     try:
