@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+# working in branch main
+
 # name:     bp_tracker.py
 # version:  0.0.1
 # date:     20220509
@@ -15,21 +17,17 @@
 #   (?) Add current distance from goal?
 #   Add more tests.
 
+import os
 import sys
 import argparse
 from datetime import datetime
-import os
 
-# Making this a global constant for now:
-# in future will probably read a config file to set this global..
-#DEFAULT_REPORT_FILE = "data/bp_numbers.txt"
-
-from dev.category import get_category
-
-report_file = 'bp_numbers.txt'
+#?! A bad name! It's a data file not a report file.
+data_file = 'bp_numbers.txt'
 
 report_format ="""
            | Low  | High | Avg  |
+           | ---  | ---- | ---  |
 Systolic ..|{sl:^6}|{sh:^6}|{sa:^6}|
 Diastolic .|{dl:^6}|{dh:^6}|{da:^6}|
 Pulse .....|{pl:^6}|{ph:^6}|{pa:^6}|
@@ -193,7 +191,7 @@ def list_average(l):
     expressed as an integer.
     """
     if not l: return 0  # list might be empty!
-    average = sum(l) // len(l)
+    average = round(sum(l) / len(l))
     return average
 
 
@@ -236,7 +234,7 @@ def averages(data, n=None):
         sys_sum += int(vals[0])
         dia_sum += int(vals[1])
         pul_sum += int(vals[2])
-    return sys_sum/n, dia_sum/n, pul_sum/n
+    return [round(val/n) for val in (sys_sum, dia_sum, pul_sum)]
 
 
 def display_averages(averages):
@@ -246,11 +244,100 @@ def display_averages(averages):
     return ('{:.1f}/{:.1f} {:.1f}'
             .format(*averages))
 
+#!! What follows consist of AHA related
+#!! functionality pulled out of /dev
 
-if __name__ == '__main__':
-#   report_file = DEFAULT_REPORT_FILE 
+# Numeric representation of the criteria used to classify
+# (individual single number) blood pressure readings:
+# s == systolic values; d == diastolic values
+# Note: these do _not_ correspond with the 'unified' system.
+s =  (50, 70, 90, 100, 121, 130, 140, 160, 180, 211, )
+d = (35, 40, 60,  65,  81,  85,  90, 100, 110, 121, )
+categories = ('Extreme hypotension',        # 0
+              'Severe hypotension',         # 1
+              'Moderate hypotension',       # 2
+              'Low normal BP',              # 3
+              'Ideal BP',                   # 4
+              'High normal BP',             # 5
+              'Pre-hypertension',           # 6
+              'Stage I hypertension',       # 7
+              'Stage II hypertension',      # 8
+              'Stage III hypertension',     # 9
+              'Hypertensive crisis',        #10
+             )
 
-    # argparser:  Propose making it its own function- return <args>.
+
+def get_category(bp, sord):
+    """
+    Given:
+        <bp>: a single (systolic or diastolic) reading.
+      & <sord>: a string that begins with an 's' or a 'd',
+        to specifiy if <bp> is systolic or diastolic:
+    returns a category.
+    """
+    if sord.startswith('s'):
+        sord = s
+    elif sord.startswith('d'):
+        sord = d
+    else:
+        print("Must specify systolic or diastolic.")
+        sys.exit()
+    for n in range(len(sord)):
+        category = categories[n]
+        if int(bp) < sord[n]:
+            return categories[n]
+    return categories[-1]
+
+
+# -------  calculate  -----------#
+
+def get_unified_status(sp, dp):
+    """
+    The calculator returns a TEXT REPRESENTATION of AHA status
+    based on the blood pressure provided (<sp>/<dp>).
+    The rules:
+    Blood Pressure Status     Systolic (mm Hg) IF  Distolic (mm Hg)
+                                 Min     Max       Min     Max
+    Normal Blood Pressure   	    <120      and      <80
+    Pre-hypertension             120     139  or    80      89
+    Stage I High Blood Pressure  140     159  or    90      99
+    (Hypertension)
+    Stage II High Blood Pressure 160 	180   or   100     110
+    (Hypertension)
+    Hypertensive crisis             >180      or       >110
+    (where emergency care is required)
+    """
+    if sp < 120 and dp < 80: return 'Normal BP'
+    if (sp >=120 and sp <140) or (dp >=80 and dp < 90):
+        return 'Pre-hypertension'
+    if (sp >=140 and sp <160) or (dp >=80 and dp <= 99):
+        return 'Stage I hypertension'
+    if (sp >=160 and sp <180) or (dp >=100 and dp <= 110):
+        return 'Stage II hypertension'
+    if sp > 180 or dp > 110: return 'Hypertensive crisis'
+    assert False
+
+
+def calc(sp, dp):
+    sp, dp = int(sp), int(dp)
+    mean = round((2 * dp + sp)/3)
+    pp = sp - dp
+    status = get_unified_status(sp, dp)
+    return mean, pp, status
+
+
+def show_calc(sp, dp):
+    mean, pp, status = calc(sp, dp)
+    return f"Mean BP: {mean}, Pulse pressure: {pp}, Status: {status}"
+
+#!! End of what was pulled out of /dev
+
+
+#!! The functions that follow are ones that Leam would prefer
+#!! be put back into the 'if __name__ == "__main__":' clause.
+#!! I'll leave that to be done later (another issue.)
+
+def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "-a", "--add",
@@ -259,7 +346,8 @@ if __name__ == '__main__':
         )
     parser.add_argument(
         "-f", "--file",
-        help = "Report file (default data/bp_numbers.txt)",
+        help = "Report file (default bp_numbers.txt)",
+        default=data_file
         )
     parser.add_argument(
         "-v", "--averages",
@@ -267,86 +355,105 @@ if __name__ == '__main__':
         help = "Report average of last n values, 0 for all",
         default=0,
         )
-    args    = parser.parse_args()
+    return parser.parse_args()
 
-    # deal with arguments collected by argparser:
-    # so far we have only 'add', 'file' and 'averages'
-    ## Modify data file prn and ..
-    ## Notify user which data file is being used:
-    if args.file:  # Suggest a separate function (ie chg_file_cmd)
-        # Dealing with data file.
-        # Expect in future this option will mofify the
-        # config file and exit.  i.e. reset the data file
-        # For the time being it provides a way of reading or
-        # adding data from/to a non default file.
-        report_file = args.file
-        print("Reassigned data file to '{}'."
-                .format(report_file))
-    else:
+
+def set_data_file(args):
+    """
+    Modify data file prn and ..
+    Notify user which data file is being used:
+    """
+    if args.file == data_file:
         print("Using '{}' as data file."
-            .format(report_file))
+            .format(data_file))
+    else:
+        print("Reassigned data file to '{}'."
+                .format(args.file))
 
-    # User wants to add data:
-    if args.add:  # suggest replace code in this if clause with a func
-        #                           <add_cmd>
-        # This format allows sequencing now and parsing later.
-        if check_file(report_file, 'w'):
-            timestamp   = datetime.now().strftime("%Y%m%d.%H%M")
-            this_report = args.add
-            this_report.append(timestamp) 
-            #! replace next two lines with store_report function
-            with open(report_file, 'a') as file:
-                file.write("{} {} {} {}\n".format(*this_report))
-        else:
-            print("Unable to write to", report_file)
-            sys.exit(1)
-#       print(this_report)
-        sys, dia, pulse, date = this_report
-        print("Recording BP of {}/{} classified as"
-            .format(sys, dia))
-        print("{} / {}"
-            .format(
-                get_category(sys, 's'),
-                get_category(dia, 'd')
-                ))
-    # User wants averages displayed:
-    elif args.averages:   # suggest replacing with func <avgs_cmd>
-        if not check_file(report_file, 'r'):
-            print("Unable to find ", report_file)
-            sys.exit(1)
-        n = int(args.averages[0])
-        data = array_from_file(report_file)
-        l = len(data)
-        redacted = """
-        if l == 0:
-            print("No readings to report!")
-            sys.exit()
-        """  # already checked that file isn't empty!
-        if (n > l) or (n < 1) : n = l
-        try:
-            avgs = averages(data, n)
-        except ValueError:
-            print("Bad data found in file")
-            sys.exit()
-        print(
-            "Average valuess (sys/dia pulse)" +
-            "of last {} readings are ...\n"
-            .format(n) +
-            "{:.0f}/{:.0f}  {:.0f}"
-            .format(*avgs))
-        print("AHA category: {} / {}"
-            .format(
-                get_category(avgs[0], 's'),
-                get_category(avgs[1], 'd')
-                ))
+def add_cmd(args):
+    # This format allows sequencing now and parsing later.
+    if check_file(args.file, 'w'):
+        timestamp   = datetime.now().strftime("%Y%m%d.%H%M")
+        this_report = args.add
+        this_report.append(timestamp) 
+        #! replace next two lines with store_report function
+        with open(args.file, 'a') as file:
+            file.write("{} {} {} {}\n".format(*this_report))
+    else:
+        print("Unable to write to", args.file)
+        sys.exit(1)
+    sp, dp, pulse, date = this_report
+    print("Recording BP of {}/{}."
+        .format(sp, dp))
+    print("{} / {}"
+        .format(
+            get_category(sp, 's'),
+            get_category(dp, 'd')
+            ))
+    print(show_calc(sp,dp))
 
-    else:   #  suggest format_data_cmd
+
+def averages_cmd(args):
+    if not check_file(args.file, 'r'):
+        print("Unable to find ", args.file)
+        sys.exit(1)
+    n = int(args.averages[0])
+    data = array_from_file(args.file)
+    l = len(data)
+    redacted = """
+    if l == 0:
+        print("No readings to report!")
+        sys.exit()
+    """  # already checked that file isn't empty!
+    if (n > l) or (n < 1) : n = l
+    try:
+        avgs = averages(data, n)
+    except ValueError:
+        print("Bad data found in file")
+        sys.exit()
+    sp, dp = avgs[:2]
+    print(
+        "Average valuess (sys/dia pulse)" +
+        "of last {} readings are ...\n"
+        .format(n) +
+        "{:.0f}/{:.0f}  {:.0f}"
+        .format(*avgs))
+    print("{} / {}"
+        .format(
+            get_category(sp, 's'),
+            get_category(dp, 'd')
+            ))
+    print(show_calc(sp,dp))
+
+
+def format_data_cmd(args):
+    if check_file(args.file, 'r'):
+        report_data = array_from_file(args.file)
+        print(report_format
+            .format(**dict_for_display(report_data)))
+
+
+def main():
+    args = get_args()
+
+    set_data_file(args)
+
+    if args.add:  # User wants to add data:
+        add_cmd(args)
+
+    elif args.averages:  # User wants average of latest readings:
+        averages_cmd(args)
+
+    else:
         # we already have a report function that is not a player
         # in this code and perhaps should be renamed.
         # Default behavior is to report.
 #       print("...going to default behaviour...")
-        if check_file(report_file, 'r'):
-            report_data = array_from_file(report_file)
-            print(report_format
-                .format(**dict_for_display(report_data)))
+        format_data_cmd(args)
+
+
              
+
+if __name__ == '__main__':
+    main()
+

@@ -100,7 +100,8 @@ class TestBpTracker(unittest.TestCase):
 #       self.assertTrue(bp_tracker.check_file(test_file, 'r'))
 
         averages = collect_averages(infile)
-        self.assertEqual(tuple(averages),
+        averages = [round(avg) for avg in averages]
+        self.assertEqual(averages,
                 bp_tracker.averages(
                     bp_tracker.array_from_file(infile))
                 )
@@ -118,7 +119,8 @@ class TestBpTracker(unittest.TestCase):
 #       self.assertTrue(bp_tracker.check_file(test_file, 'r'))
 
         averages = collect_averages(infile)
-        self.assertEqual(tuple(averages),
+        averages = [round(avg) for avg in averages]
+        self.assertEqual(averages,
                 bp_tracker.averages(
                     bp_tracker.array_from_file(infile)))
 
@@ -126,7 +128,8 @@ class TestBpTracker(unittest.TestCase):
     def test_averaging_only_last_few(self):
         for n in range(7):
             averages = collect_averages(infile)[-7:]
-            self.assertEqual(tuple(averages),
+            averages = [round(avg) for avg in averages]
+            self.assertEqual(averages,
                 bp_tracker.averages(
                     bp_tracker.array_from_file(infile)), n
                 )
@@ -338,6 +341,41 @@ class TestBpTracker(unittest.TestCase):
         expected = '110.0/90.0 70.0'
         result = bp_tracker.display_averages([110, 90, 70]) 
         self.assertTrue(result == expected)
+
+##! The next tests pertain to AHA criteria.
+
+    def test_get_category(self):
+        for data in (
+                [tuple(item.split()) for item in (
+                    "49 s 0", "34 d 0", "50 s 1", "35 d 1",
+                    "69 s 1", "39 d 1",
+                    "70 s 2", "40 d 2", "89 s 2", "59 d 2",
+                    "90 s 3", "60 d 3", "99 s 3", "64 d 3",
+                    "100 s 4", "65  d 4", "120 s 4", "80  d 4",
+                    "121 s 5", "81  d 5", "129 s 5", "84  d 5",
+                    "130 s 6", "85  d 6", "139 s 6", "89  d 6",
+                    "140 s 7", "90  d 7", "159 s 7", "99  d 7",
+                    "160 s 8", "100 d 8", "179 s 8", "109 d 8",
+                    "180 s 9", "110 d 9", "210 s 9", "120 d 9",
+                    "211 s 10", "121 d 10",
+                                    )]):
+#           print("{} {} {} yields {}"
+#               .format(data[0], data[1], data[2],
+#               category.get_category(data[0], data[1])
+#                   ))
+            self.assertEqual(
+                bp_tracker.get_category(data[0], data[1]),
+                bp_tracker.categories[int(data[2])])
+
+
+    def test_calc(self):
+        for sys, dia, mean, pp, status in(
+                (115, 70, 85, 45, 'Normal BP'),
+                (127, 85, 99, 42, 'Pre-hypertension'),
+                (145, 93, 110,52, 'Stage I hypertension'),
+                ):
+            res = bp_tracker.calc(sys, dia)
+            self.assertEqual(res, (mean, pp, status,))
 
 
 redact = '''  # We should run the following once in awhile!

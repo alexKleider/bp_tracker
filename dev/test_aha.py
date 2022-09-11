@@ -1,21 +1,32 @@
 #!/usr/bin/env python3
 
-# File: test_categories.py
+# File: test_aha.py
 
-from dev import category
+import os
+try:
+    import aha
+except ImportError:
+    from dev import aha
 
-TEST_DATA = 'bp_test_data'
+cwd = os.getcwd()
+print(cwd)
+if cwd.endswith('dev'):
+    TEST_DATA = 'bp_test_data'
+else:
+    TEST_DATA = 'dev/bp_test_data'
 
 def test_translation():
     with open(TEST_DATA, 'r') as instream:
         for line in instream:
+            line = line.strip()
+            if not line or line.startswith('#'): continue
             parts = line.strip().split()
             sys, dia = parts[0].split('/')
             level = ' '.join(parts[1:])
-            sys_category = category.get_category(sys, 
-                category.systolics)
-            dia_category = category.get_category(dia, 
-                category.diastolics)
+            sys_category = aha.get_category(sys, 
+                's')
+            dia_category = aha.get_category(dia, 
+                'd')
             if (sys_category != level):
                 print("Error Systolic {}: {} != {}"
                     .format(sys, sys_category, level))
@@ -25,10 +36,10 @@ def test_translation():
                     .format(dia,dia_category, level)) 
             else: print("OK ", end='')
             
-            assert category.get_category(sys, 
-                    category.systolics) == level
-            assert category.get_category(dia, 
-                    category.diastolics) == level
+            assert aha.get_category(sys, 
+                    's') == level
+            assert aha.get_category(dia, 
+                    'd') == level
     print()
 
 if __name__ == '__main__':
