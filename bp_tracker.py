@@ -96,7 +96,7 @@ def valid_data(line, invalid_lines=None):
     return (tuple(data))
 
 
-def array_from_file(report_file):
+def array_from_file(report_file, invalid_lines=invalid_lines):
     """
     Input is the report file: four (string) values per line.[1]
     Output is a list of 4 tuples: (int, int, int, float).
@@ -415,7 +415,7 @@ def averages_cmd(args):
         print("Unable to find ", args.file)
         sys.exit(1)
     n = int(args.averages[0])
-    data = array_from_file(args.file)
+    data = array_from_file(args.file, invalid_lines)
     l = len(data)
 
     if l == 0:
@@ -446,7 +446,7 @@ def averages_cmd(args):
 
 def format_data_cmd(args):
     if check_file(args.file, 'r'):
-        report_data = array_from_file(args.file)
+        report_data = array_from_file(args.file, invalid_lines)
         print(report_format
             .format(**dict_for_display(report_data)))
 

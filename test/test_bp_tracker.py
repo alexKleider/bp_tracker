@@ -214,6 +214,29 @@ class TestBpTracker(unittest.TestCase):
             expected)
 
 
+    def test_valid_data(self):
+        bad = []
+        lines_and_results = (
+            ("110 59 68 20220809.1640", (110,59,68,20220809.1640)),
+            ("124 62 62 20220810.0840", (124,62,62,20220810.0840)),
+            ("134 63 57 20220812.0758", (134,63,57,20220812.0758)),
+            ("134 62 57 20220812.1128", (134,62,57,20220812.1128)),
+            ("100 59 62 20220812.1323", (100,59,62,20220812.1323)),
+            ("total junk times four", None),
+            ("to few components", None),
+            ("to many all junk components", None),
+            ("23 14 sixty 4.5", None),
+            ("23 14 89 4.5 00", None),
+                )
+        for entry in lines_and_results:
+            self.assertEqual(bp_tracker.valid_data(entry[0],bad),
+                                entry[1])
+        errors = [parts[0] for parts in lines_and_results
+                    if parts[1] == None]
+        self.assertEqual(bad, errors)
+        pass
+
+
     def test_array_from_file(self):
         # Write a test file with three lines of data,
         # and test that the returned list has a len of 3.
