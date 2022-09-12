@@ -38,6 +38,9 @@ report_format_2 += "Systolic  |{:^6}|{:^6}|{:^6}|\n"
 report_format_2 += "Diastolic |{:^6}|{:^6}|{:^6}|\n"
 report_format_2 += "Pulse     |{:^6}|{:^6}|{:^6}|\n"
 
+invalid_lines = []  # to be used when -v --verbose option is implemented.
+
+
 def check_file(file, mode):
     """
     Mode (must be 'r' or 'w') specifies if we need to 
@@ -69,6 +72,29 @@ def useful_lines(stream, comment="#"):
         if line:
             yield line
 
+def valid_data(line, invalid_lines=None):
+    """
+    Accepts what is assumed to be a valid line.
+    If valid, returns a 4 tuple (int, int, int, float).
+    If not valid and if <invalid_lines> is not None,
+    assumes errors is a list to which the invalid line is added.
+    """
+    data = line.split()
+    if len(data) == 4:
+        try:
+            for i in range(3):
+                data[i] = int(data[i])
+            data[3] = float(data[3])
+        except ValueError:
+            if invalid_lines != None:
+                invalid_lines.append(line)
+            return
+    else:
+        if invalid_lines != None:
+            invalid_lines.append(line)
+        return
+    return (tuple(data))
+
 
 def array_from_file(report_file):
     """
@@ -80,26 +106,12 @@ def array_from_file(report_file):
     #? the last isn't really a float: it's YYYYmmdd.hhmm
     #? a string representation of a timestamp!
     """
-    #! replace with clause with store_report function
-    def get_error_message(f, line):
-        return (
-      "Badly formated line found in input ..."
-      + "\n file: {}" .format(f)
-      + '\n"{}"'.format(line))
     res = []
     with open(report_file, 'r') as stream:
         for line in useful_lines(stream):
-            data = line.split()
-            if len(data) == 4:
-                try:
-                    for i in range(3):
-                        data[i] = int(data[i])
-                    data[3] = float(data[3])
-                except ValueError:
-                    print(get_error_message(report_file, line))
-            else:
-                raise Exception(get_error_message(report_file, line))
-            res.append(tuple(data))
+            numbers = valid_data(line, invalid_lines=invalid_lines)
+            if numbers:
+                res.append(numbers)
     return res
  
 
