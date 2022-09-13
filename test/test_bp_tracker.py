@@ -361,8 +361,8 @@ class TestBpTracker(unittest.TestCase):
 
     def test_display_averages(self):
         # Pass in hard coded data, test the result.
-        expected = '110.0/90.0 70.0'
-        result = bp_tracker.display_averages([110, 90, 70]) 
+        expected = '110/90 70'
+        result = bp_tracker.display_averages([110.345, 89.9, 70.41]) 
         self.assertTrue(result == expected)
 
 ##! The next tests pertain to AHA criteria.

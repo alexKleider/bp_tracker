@@ -256,9 +256,9 @@ def averages(data, n=None):
 
 def display_averages(averages):
     """
-    Assumes want one decimal place. (Leam may want none!)
+    <averages> is a length 3 iterable of floats.
     """
-    return ('{:.1f}/{:.1f} {:.1f}'
+    return ('{:.0f}/{:.0f} {:.0f}'
             .format(*averages))
 
 #!! What follows consist of AHA related
