@@ -26,11 +26,12 @@ from datetime import datetime
 data_file = 'bp_numbers.txt'
 
 report_format ="""
-           | Low  | High | Avg  |
-           | ---  | ---- | ---  |
-Systolic ..|{sl:^6}|{sh:^6}|{sa:^6}|
-Diastolic .|{dl:^6}|{dh:^6}|{da:^6}|
-Pulse .....|{pl:^6}|{ph:^6}|{pa:^6}|
+           | High  | Low | Avg  | Classification |
+           | ----  | --- | ---  | -------------- |
+Systolic ..|{sl:^6}|{sh:^6}|{sa:^6}|{s_cls:^16}|
+Diastolic .|{dl:^6}|{dh:^6}|{da:^6}|{d_cls:^16}|
+Pulse .....|{pl:^6}|{ph:^6}|{pa:^6}| -------------- |
+
 """
 
 report_format_2 =  "          | Low  | High | Avg  |\n"
@@ -434,10 +435,6 @@ def get_args():
         help = "Add in the order of systolic, diastolic, pulse",
         )
     parser.add_argument(
-        "-v", "--average",
-        action='store_true',
-        )
-    parser.add_argument(
         "-t", "--times",
         nargs=2,
         type=int,
@@ -516,11 +513,16 @@ def averages_cmd(data):
     print(show_calc(systolic, diastolic))
 
 
-def format_data_cmd(args):
-    if check_file(args.file, 'r'):
-        report_data = array_from_file(args.file, invalid_lines)
-        print(report_format
-            .format(**dict_for_display(report_data)))
+def format_data_cmd(data):
+    l = len(data)
+    display_dict = dict_for_display(data)
+    display_dict['s_cls'] = get_category(display_dict['sa'], 's')
+    display_dict['d_cls'] = get_category(display_dict['da'], 'd')
+    print("Averaging a total of {} readings:".format(l), end='') 
+    print(report_format
+            .format(**display_dict), end='')
+    print(show_calc(display_dict['sa'], display_dict['da']))
+    print()
 
 
 def main():
@@ -534,20 +536,12 @@ def main():
         return     # (in which case we're done)
 
 
-    else:   # ... or Analyse data: so we need to
-            # collect it and apply the filters ...
-        data = filter_data(array_from_file(data_file,
-                                            invalid_lines),
-                            args)
-        if args.average:  # average of (possibly filtered) readings
-            averages_cmd(data)
-
-        else:
-            # we already have a report function that is not a player
-            # in this code and perhaps should be renamed.
-            # Default behavior is to report.
-#           print("...going to default behaviour...")
-            format_data_cmd(args)
+    # ... or Analyse data: so we need to
+    # collect it and apply the filters ...
+    data = filter_data(array_from_file(data_file,
+                                        invalid_lines),
+                        args)
+    format_data_cmd(data)
 
 
              
