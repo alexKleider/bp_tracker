@@ -38,8 +38,8 @@ report_format_2 += "Systolic  |{:^6}|{:^6}|{:^6}|\n"
 report_format_2 += "Diastolic |{:^6}|{:^6}|{:^6}|\n"
 report_format_2 += "Pulse     |{:^6}|{:^6}|{:^6}|\n"
 
-invalid_lines = []  # to be used when -v --verbose option is implemented.
-
+invalid_lines = []  # still to decide: -v or -i --invalid option?
+# option might collect a file name into which to dump invalid_lines
 
 def check_file(file, mode):
     """
@@ -91,18 +91,18 @@ def filter_data(data, args):
     ret = []
     ok = True
     for item in data:
-        if args.time_of_day and not time_of_day_filter(data,
-                time_of_day[0], time_of_day[1]):
+        if args.times and not time_of_day_filter(data,
+                args.times[0], args.times[1]):
             continue
-        if args.date_range and not date_range_filter(data, 
-                date_range[0], date_range[1]):
+        if args.range and not date_range_filter(data, 
+                args.range[0], args.range[1]):
             continue
-        if args.not_before_date and not not_before_filter(data,
-                not_before):
+        if args.date and not not_before_filter(data,
+                args.date):
             continue
         ret.append(item)
-    n = args.number2consider
-    if n != 0:
+    if args.number:
+        n = args.number[0]
         l = len(ret)
         if l == 0:
             print("No readings to report!")
@@ -421,12 +421,11 @@ def show_calc(sp, dp):
 
 def get_args():
     """
-    -d, -n, or the "time of day" option was used?
     """
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "-f", "--file",
-        help = "Report file (default bp_numbers.txt)",
+        help = "Report FILE (default bp_numbers.txt)",
         default=data_file
         )
     parser.add_argument(
@@ -435,34 +434,32 @@ def get_args():
         help = "Add in the order of systolic, diastolic, pulse",
         )
     parser.add_argument(
-        "-t", "--time_of_day",
+        "-v", "--average",
+        action='store_true',
+        )
+    parser.add_argument(
+        "-t", "--times",
         nargs=2,
         type=int,
-        help = "Ignore readings outside of time range",
-        default=0,
+        help = "Only consider readings within TIMES span",
         )
     parser.add_argument(
-        "-r", "--date_range",
+        "-r", "--range",
         nargs=2,
         type=int,
-        help = "Only consider readings within the date range",
-        default=0,
+        help = "Only consider readings taken within date RANGE.",
         )
     parser.add_argument(
-        "-d", "--not_before_date",
+        "-d", "--date",
         nargs=1,
         type=int,
-        help = "Ignore readings prior to NOT_BEFORE_DATE",
-        default=0,
+        help = "Ignore readings prior to DATE",
         )
     parser.add_argument(
-        "-n", "--number2average",
+        "-n", "--number",
         nargs=1,
         type=int,
-        help = (
-        """Average the most recent NUMBERS2AVERAGE values, 0 for all;
-if other filters are set, they are applied first."""),
-        default=0,
+        help = "Only consider the last NUMBER valid readings",
         )
     return parser.parse_args()
 
@@ -502,38 +499,21 @@ def add_cmd(args):
     print(show_calc(sp,dp))
 
 
-def averages_cmd(args):
-    if not check_file(args.file, 'r'):
-        print("Unable to find ", args.file)
-        sys.exit(1)
-    n = int(args.number2average[0])
-    data = array_from_file(args.file, invalid_lines)
-    l = len(data)
-
-    if l == 0:
-        print("No readings to report!")
-        sys.exit()
-    redacted = """
-    """  # already checked that file isn't empty!
-    if (n > l) or (n < 1) : n = l
-    try:
-        avgs = averages(data, n)
-    except ValueError:
-        print("Bad data found in file")
-        sys.exit()
-    sp, dp = avgs[:2]
+def averages_cmd(data):
+    n = len(data)
+    averages = [list_average(entry) for entry in 
+            list_collations(data[:3])]
+    systolic, diastolic, pulse = averages
     print(
-        "Average valuess (sys/dia pulse)" +
-        "of last {} readings are ...\n"
-        .format(n) +
-        "{:.0f}/{:.0f}  {:.0f}"
-        .format(*avgs))
+        "Average values (sys/dia pulse)" +
+        "of last {} readings are ...\n".format(n) +
+        "{}/{}  {}".format(*averages))
     print("{} / {}"
         .format(
-            get_category(sp, 's'),
-            get_category(dp, 'd')
+            get_category(systolic, 's'),
+            get_category(diastolic, 'd')
             ))
-    print(show_calc(sp,dp))
+    print(show_calc(systolic, diastolic))
 
 
 def format_data_cmd(args):
@@ -548,18 +528,26 @@ def main():
 
     set_data_file(args)
 
-    if args.add:  # User wants to add data:
+    # User either wishes to Add a reading ...
+    if args.add:
         add_cmd(args)
+        return     # (in which case we're done)
 
-    elif args.number2average:  # User wants average of latest readings:
-        averages_cmd(args)
 
-    else:
-        # we already have a report function that is not a player
-        # in this code and perhaps should be renamed.
-        # Default behavior is to report.
-#       print("...going to default behaviour...")
-        format_data_cmd(args)
+    else:   # ... or Analyse data: so we need to
+            # collect it and apply the filters ...
+        data = filter_data(array_from_file(data_file,
+                                            invalid_lines),
+                            args)
+        if args.average:  # average of (possibly filtered) readings
+            averages_cmd(data)
+
+        else:
+            # we already have a report function that is not a player
+            # in this code and perhaps should be renamed.
+            # Default behavior is to report.
+#           print("...going to default behaviour...")
+            format_data_cmd(args)
 
 
              
