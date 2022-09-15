@@ -401,6 +401,46 @@ class TestBpTracker(unittest.TestCase):
             self.assertEqual(res, (mean, pp, status,))
 
 
+    def test_no_date_stamp(self):
+        self.assertEqual(bp_tracker.no_date_stamp(
+            (115, 67, 66, 20220914.0839)), None)
+        self.assertEqual(bp_tracker.no_date_stamp(
+            (115, 67, 66, 0.0)), True)
+
+
+    def test_time_of_day_filter(self):
+        self.assertEqual(bp_tracker.time_of_day_filter(
+            (115, 67, 66, 20220914.0839), 800, 900), True)
+        self.assertEqual(bp_tracker.time_of_day_filter(
+            (115, 67, 66, 20220914.0839), 900, 1000), None)
+        self.assertEqual(bp_tracker.time_of_day_filter(
+            (115, 67, 66, 0.0), 800, 900), None)
+
+
+    def test_date_range_filter(self):
+        self.assertEqual(bp_tracker.date_range_filter(
+            (115, 67, 66, 20220914.0839),
+            20220913.0800, 20220916.0900), True)
+        self.assertEqual(bp_tracker.time_of_day_filter(
+            (115, 67, 66, 20220914.0839),
+            20220910.0800, 20220913.0900), None)
+        self.assertEqual(bp_tracker.time_of_day_filter(
+            (115, 67, 66, 0.0),
+            20220910.0800, 20220913.0900), None)
+
+
+    def test_not_before_filter(self):
+        self.assertEqual(bp_tracker.not_before_filter(
+            (115, 67, 66, 20220914.0839),
+            20220913.0800), True)
+        self.assertEqual(bp_tracker.not_before_filter(
+            (115, 67, 66, 20220914.0839),
+            20220915.0800), None)
+        self.assertEqual(bp_tracker.not_before_filter(
+            (115, 67, 66, 0.0),
+            20220915.0800), None)
+
+
 redact = '''  # We should run the following once in awhile!
 class TestTestsAreRun(unittest.TestCase):
     def test_testing(self):

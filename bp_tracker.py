@@ -72,6 +72,64 @@ def useful_lines(stream, comment="#"):
         if line:
             yield line
 
+
+def no_date_stamp(data):
+    if data[3] == 0:
+        return True
+
+
+def filter_data(data, args):
+    """
+    """
+    ret = []
+    ok = True
+    for item in data:
+        if args.time_of_day and not time_of_day_filter(data,
+                time_of_day[0], time_of_day[1]):
+            continue
+        if args.date_range and not date_range_filter(data, 
+                date_range[0], date_range[1]):
+            continue
+        if args.not_before_date and not not_before_filter(data,
+                not_before):
+            continue
+        ret.append(item)
+    n = args.number2consider
+    if n != 0:
+        l = len(ret)
+        if l == 0:
+            print("No readings to report!")
+            sys.exit()
+        if (n > l) or (n < 1):
+            n = l
+        ret = ret[-n:]
+    return ret
+
+
+def time_of_day_filter(data, begin, end):
+    if no_date_stamp(data):
+        return
+    time = int(str(data[3]).split('.')[-1])
+    if time >= begin and time <= end:
+        return True
+
+
+def date_range_filter(data, begin, end):
+    if no_date_stamp(data):
+        return
+    day = int(str(data[3]).split('.')[0])
+    if day >= begin and day <= end:
+        return True
+
+
+def not_before_filter(data, date):
+    if no_date_stamp(data):
+        return
+    day = int(str(data[3]).split('.')[0])
+    if day >= date:
+        return True
+
+
 def valid_data(line, invalid_lines=None):
     """
     Accepts what is assumed to be a valid line.
@@ -96,7 +154,7 @@ def valid_data(line, invalid_lines=None):
     return (tuple(data))
 
 
-def array_from_file(report_file, invalid_lines=invalid_lines):
+def array_from_file(report_file, invalid_lines=None):
     """
     Input is the report file: four (string) values per line.[1]
     Output is a list of 4 tuples: (int, int, int, float).
@@ -355,6 +413,9 @@ def show_calc(sp, dp):
 #!! I'll leave that to be done later (another issue.)
 
 def get_args():
+    """
+    -d, -n, or the "time of day" option was used?
+    """
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "-a", "--add",
@@ -367,9 +428,33 @@ def get_args():
         default=data_file
         )
     parser.add_argument(
-        "-v", "--averages",
+        "-n", "--number2average",
         nargs=1,
-        help = "Report average of last n values, 0 for all",
+        type=int,
+        help = (
+        """Average the most recent NUMBERS2AVERAGE values, 0 for all;
+if other filters are set, they are applied first."""),
+        default=0,
+        )
+    parser.add_argument(
+        "-t", "--time_of_day",
+        nargs=2,
+        type=int,
+        help = "Ignore readings outside of time range",
+        default=0,
+        )
+    parser.add_argument(
+        "-r", "--date_range",
+        nargs=2,
+        type=int,
+        help = "Only consider readings within the date range",
+        default=0,
+        )
+    parser.add_argument(
+        "-d", "--not_before_date",
+        nargs=1,
+        type=int,
+        help = "Ignore readings prior to NOT_BEFORE_DATE",
         default=0,
         )
     return parser.parse_args()
@@ -414,7 +499,7 @@ def averages_cmd(args):
     if not check_file(args.file, 'r'):
         print("Unable to find ", args.file)
         sys.exit(1)
-    n = int(args.averages[0])
+    n = int(args.number2average[0])
     data = array_from_file(args.file, invalid_lines)
     l = len(data)
 
@@ -459,7 +544,7 @@ def main():
     if args.add:  # User wants to add data:
         add_cmd(args)
 
-    elif args.averages:  # User wants average of latest readings:
+    elif args.number2average:  # User wants average of latest readings:
         averages_cmd(args)
 
     else:
