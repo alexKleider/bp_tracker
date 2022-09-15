@@ -80,6 +80,13 @@ def no_date_stamp(data):
 
 def filter_data(data, args):
     """
+    Although the decision is perhaps arbitrary,
+    we do the filtration first and only consider
+    the -n --number2consider argument on what ever
+    passes the filters rather than starting with
+    -n readings and applying filters afterwards
+    which could result in less than n values being
+    considered.
     """
     ret = []
     ok = True
@@ -418,23 +425,14 @@ def get_args():
     """
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "-a", "--add",
-        nargs=3,
-        help = "Add in the order of systolic, diastolic, pulse",
-        )
-    parser.add_argument(
         "-f", "--file",
         help = "Report file (default bp_numbers.txt)",
         default=data_file
         )
     parser.add_argument(
-        "-n", "--number2average",
-        nargs=1,
-        type=int,
-        help = (
-        """Average the most recent NUMBERS2AVERAGE values, 0 for all;
-if other filters are set, they are applied first."""),
-        default=0,
+        "-a", "--add",
+        nargs=3,
+        help = "Add in the order of systolic, diastolic, pulse",
         )
     parser.add_argument(
         "-t", "--time_of_day",
@@ -455,6 +453,15 @@ if other filters are set, they are applied first."""),
         nargs=1,
         type=int,
         help = "Ignore readings prior to NOT_BEFORE_DATE",
+        default=0,
+        )
+    parser.add_argument(
+        "-n", "--number2average",
+        nargs=1,
+        type=int,
+        help = (
+        """Average the most recent NUMBERS2AVERAGE values, 0 for all;
+if other filters are set, they are applied first."""),
         default=0,
         )
     return parser.parse_args()
