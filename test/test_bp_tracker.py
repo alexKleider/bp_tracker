@@ -234,7 +234,6 @@ class TestBpTracker(unittest.TestCase):
         errors = [parts[0] for parts in lines_and_results
                     if parts[1] == None]
         self.assertEqual(bad, errors)
-        pass
 
 
     def test_array_from_file(self):
@@ -314,7 +313,8 @@ class TestBpTracker(unittest.TestCase):
         self.assertTrue(third  == [60, 70, 80])
 
     def test_dict_for_display(self):
-        # Pass in hard coded data, test the result values.
+        #!! Need to add test for following keys:
+        #   s_cls, d_cls, n_data_points, calcs
         data = [ 
             [ 100, 80, 60 ],
             [ 110, 90, 70 ],
@@ -351,7 +351,8 @@ class TestBpTracker(unittest.TestCase):
 
     def test_list_low_high_avg(self):
         # Pass in hard coded data, test the result values.
-        self.assertTrue((70, 90, 80) == bp_tracker.list_low_high_avg([70, 80, 90]))
+        self.assertEqual((70, 90, 80),
+                bp_tracker.list_low_high_avg([90, 70, 80]))
 
 
     def test_averages(self):
@@ -391,6 +392,18 @@ class TestBpTracker(unittest.TestCase):
                 bp_tracker.categories[int(data[2])])
 
 
+    def test_get_unified_status(self):
+        test_data = ((115, 70, 85, 45, 'Normal BP'),
+             (127, 85, 99, 42, 'Pre-hypertension'),
+             (145, 93, 110,52, 'Stage I hypertension'),
+             (170, 104,126,66, 'Stage II hypertension'),
+             (200, 112,141,88, 'Hypertensive crisis'),
+            )
+        for sp, dp, mean, pp, status in test_data:
+            res = bp_tracker.calc(sp, dp)
+            self.assertEqual(res, (mean, pp, status,))
+
+
     def test_calc(self):
         for sys, dia, mean, pp, status in(
                 (115, 70, 85, 45, 'Normal BP'),
@@ -399,6 +412,11 @@ class TestBpTracker(unittest.TestCase):
                 ):
             res = bp_tracker.calc(sys, dia)
             self.assertEqual(res, (mean, pp, status,))
+
+
+    def test_show_calc(self):
+        self.assertEqual(bp_tracker.show_calc(127, 85),
+        "Mean BP: 99, Pulse pressure: 42, Status: Pre-hypertension")
 
 
     def test_no_date_stamp(self):
@@ -439,6 +457,30 @@ class TestBpTracker(unittest.TestCase):
         self.assertEqual(bp_tracker.not_before_filter(
             (115, 67, 66, 0.0),
             20220915.0800), None)
+
+
+    def test_filter_data(self):
+        pass
+
+
+    def test_get_args(self):
+        pass
+
+    
+    def test_set_data_file(self):
+        pass
+
+
+    def test_add_cmd(self):
+        pass
+
+
+    def test_format_data_cmd(self):
+        pass
+
+
+    def test_main(self):
+        pass
 
 
 redact = '''  # We should run the following once in awhile!

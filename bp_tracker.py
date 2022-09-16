@@ -22,16 +22,16 @@ import sys
 import argparse
 from datetime import datetime
 
-#?! A bad name! It's a data file not a report file.
 data_file = 'bp_numbers.txt'
 
 report_format ="""
-           | High  | Low | Avg  | Classification |
-           | ----  | --- | ---  | -------------- |
+           |  Low | High | Avg  | Classification |
+           |  --- | ---- | ---  | -------------- |
 Systolic ..|{sl:^6}|{sh:^6}|{sa:^6}|{s_cls:^16}|
 Diastolic .|{dl:^6}|{dh:^6}|{da:^6}|{d_cls:^16}|
 Pulse .....|{pl:^6}|{ph:^6}|{pa:^6}| -------------- |
 
+{calcs}
 """
 
 report_format_2 =  "          | Low  | High | Avg  |\n"
@@ -92,14 +92,14 @@ def filter_data(data, args):
     ret = []
     ok = True
     for item in data:
-        if args.times and not time_of_day_filter(data,
+        if args.times and not time_of_day_filter(item,
                 args.times[0], args.times[1]):
             continue
-        if args.range and not date_range_filter(data, 
+        if args.range and not date_range_filter(item, 
                 args.range[0], args.range[1]):
             continue
-        if args.date and not not_before_filter(data,
-                args.date):
+        if args.date and not not_before_filter(item,
+                args.date[0]):
             continue
         ret.append(item)
     if args.number:
@@ -114,18 +114,18 @@ def filter_data(data, args):
     return ret
 
 
-def time_of_day_filter(data, begin, end):
-    if no_date_stamp(data):
+def time_of_day_filter(datum, begin, end):
+    if no_date_stamp(datum):
         return
-    time = int(str(data[3]).split('.')[-1])
+    time = int(str(datum[3]).split('.')[-1])
     if time >= begin and time <= end:
         return True
 
 
-def date_range_filter(data, begin, end):
-    if no_date_stamp(data):
+def date_range_filter(datum, begin, end):
+    if no_date_stamp(datum):
         return
-    day = int(str(data[3]).split('.')[0])
+    day = int(str(datum[3]).split('.')[0])
     if day >= begin and day <= end:
         return True
 
@@ -248,10 +248,15 @@ def dict_for_display(report_data):
     """
     Takes a data set each entry of which contains a minimum of 3
     strings, each representing an int.
-    Returns a dict of ints keyed by:
+    Returns a dict which includes ints keyed by:
+    (   n_data_points,  # number of readings
         sh, sa, sl,  # s(ystolic  h{ighest a(verage l(lowest
         dh, da, dl,  # d(iastolic
-        ph, pa, pl.  # p(ulse
+        ph, pa, pl,  # p(ulse
+    # and the following strings keyed by:
+        s_cls, d_cls,  # AHA classification of the avg values
+        calcs,  # the (AHA) 'calculated' results 
+    ) 
     """
     systolics, diastolics, pulses = list_collations(report_data)
     res = {}
@@ -264,6 +269,10 @@ def dict_for_display(report_data):
     res['pl'] = list_low_high(pulses)[0]
     res['ph'] = list_low_high(pulses)[1]
     res['pa'] = list_average(pulses) 
+    res['s_cls'] = get_category(res['sa'], 's')
+    res['d_cls'] = get_category(res['da'], 'd')
+    res['n_data_points'] = len(report_data)
+    res['calcs'] = show_calc(res['sa'], res['da'])
     return res
 
 
@@ -293,6 +302,7 @@ def list_low_high_avg(l):
 
 def averages(data, n=None):
     """
+    # NOTE: not being used!
     Input is a list of 4 tuples. (output of array_from_file func)
     Result is a tuple of floats: averages of the
     systoli, diastolic and pulse values.
@@ -413,12 +423,6 @@ def show_calc(sp, dp):
     mean, pp, status = calc(sp, dp)
     return f"Mean BP: {mean}, Pulse pressure: {pp}, Status: {status}"
 
-#!! End of what was pulled out of /dev
-
-
-#!! The functions that follow are ones that Leam would prefer
-#!! be put back into the 'if __name__ == "__main__":' clause.
-#!! I'll leave that to be done later (another issue.)
 
 def get_args():
     """
@@ -496,33 +500,12 @@ def add_cmd(args):
     print(show_calc(sp,dp))
 
 
-def averages_cmd(data):
-    n = len(data)
-    averages = [list_average(entry) for entry in 
-            list_collations(data[:3])]
-    systolic, diastolic, pulse = averages
-    print(
-        "Average values (sys/dia pulse)" +
-        "of last {} readings are ...\n".format(n) +
-        "{}/{}  {}".format(*averages))
-    print("{} / {}"
-        .format(
-            get_category(systolic, 's'),
-            get_category(diastolic, 'd')
-            ))
-    print(show_calc(systolic, diastolic))
-
-
 def format_data_cmd(data):
     l = len(data)
     display_dict = dict_for_display(data)
-    display_dict['s_cls'] = get_category(display_dict['sa'], 's')
-    display_dict['d_cls'] = get_category(display_dict['da'], 'd')
     print("Averaging a total of {} readings:".format(l), end='') 
     print(report_format
-            .format(**display_dict), end='')
-    print(show_calc(display_dict['sa'], display_dict['da']))
-    print()
+            .format(**display_dict))
 
 
 def main():
