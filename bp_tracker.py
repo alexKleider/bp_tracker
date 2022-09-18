@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
 
-# working in branch main
-
 # name:     bp_tracker.py
 # version:  0.0.1
 # date:     20220509
@@ -117,7 +115,7 @@ def filter_data(data, args):
 def time_of_day_filter(datum, begin, end):
     if no_date_stamp(datum):
         return
-    time = int(str(datum[3]).split('.')[-1])
+    time = datum[3].split('.')[-1]
     if time >= begin and time <= end:
         return True
 
@@ -125,7 +123,7 @@ def time_of_day_filter(datum, begin, end):
 def date_range_filter(datum, begin, end):
     if no_date_stamp(datum):
         return
-    day = int(str(datum[3]).split('.')[0])
+    day = datum[3].split('.')[0]
     if day >= begin and day <= end:
         return True
 
@@ -133,7 +131,7 @@ def date_range_filter(datum, begin, end):
 def not_before_filter(data, date):
     if no_date_stamp(data):
         return
-    day = int(str(data[3]).split('.')[0])
+    day = data[3].split('.')[0]
     if day >= date:
         return True
 
@@ -150,7 +148,8 @@ def valid_data(line, invalid_lines=None):
         try:
             for i in range(3):
                 data[i] = int(data[i])
-            data[3] = float(data[3])
+            # Changed from float, since float removed trailing 0's.
+            data[3] = str(data[3])    
         except ValueError:
             if invalid_lines != None:
                 invalid_lines.append(line)
@@ -159,22 +158,23 @@ def valid_data(line, invalid_lines=None):
         if invalid_lines != None:
             invalid_lines.append(line)
         return
-    return (tuple(data))
+    #return (tuple(data))
+    return data
 
 
 def array_from_file(report_file, invalid_lines=None):
     """
     Input is the report file: four (string) values per line.[1]
-    Output is a list of 4 tuples: (int, int, int, float).
+    Output is a list of 4 tuples: (int, int, int, str).
     Tuples are: systolic, diastolic, pulse, time stamp.[1]
     [1] Each of the 4 strings represents a number:
-    first three are integers, last (the fourth) is a float.
+    first three are integers, last (the fourth) is a str.
     #? the last isn't really a float: it's YYYYmmdd.hhmm
     #? a string representation of a timestamp!
     """
     res = []
-    with open(report_file, 'r') as stream:
-        for line in useful_lines(stream):
+    with open(report_file, 'r') as f:
+        for line in useful_lines(f):
             numbers = valid_data(line, invalid_lines=invalid_lines)
             if numbers:
                 res.append(numbers)
@@ -188,17 +188,17 @@ def report(report_data):
     Output is a 4 tuple, each member of which is
     the highest of its category in the input.
     Ordering function is based on int() for the first three
-    and float() for the last of each 4 tuple of input.
+    and str() for the last of each 4 tuple of input.
     """
     highest_systolic  = 0
     highest_diastolic = 0
     highest_pulse     = 0
-    latest_date       = 0.0
+    latest_date       = '0.0'
     for datum in report_data:
         systolic  = int(datum[0])
         diastolic = int(datum[1])
         pulse     = int(datum[2])
-        date      = float(datum[3]) 
+        date      = str(datum[3]) 
         if systolic > highest_systolic:
             highest_systolic = systolic
             highest_systolic_event = datum
@@ -477,7 +477,7 @@ def set_data_file(args):
         print("Reassigned data file to '{}'."
                 .format(args.file))
 
-def add_cmd(args):
+def add(args):
     # This format allows sequencing now and parsing later.
     if check_file(args.file, 'w'):
         timestamp   = datetime.now().strftime("%Y%m%d.%H%M")
@@ -500,7 +500,7 @@ def add_cmd(args):
     print(show_calc(sp,dp))
 
 
-def format_data_cmd(data):
+def format_data(data):
     l = len(data)
     display_dict = dict_for_display(data)
     print("Averaging a total of {} readings:".format(l), end='') 
@@ -508,27 +508,22 @@ def format_data_cmd(data):
             .format(**display_dict))
 
 
-def main():
+if __name__ == '__main__':
     args = get_args()
 
     set_data_file(args)
 
     # User either wishes to Add a reading ...
     if args.add:
-        add_cmd(args)
-        return     # (in which case we're done)
-
+        add(args)
+        sys.exit(0)
 
     # ... or Analyse data: so we need to
     # collect it and apply the filters ...
-    data = filter_data(array_from_file(data_file,
-                                        invalid_lines),
-                        args)
-    format_data_cmd(data)
-
-
-             
-
-if __name__ == '__main__':
-    main()
+    data = filter_data(
+        array_from_file(data_file,
+        invalid_lines),
+        args
+    )
+    format_data(data)
 

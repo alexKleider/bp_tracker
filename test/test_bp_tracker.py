@@ -9,155 +9,43 @@ import unittest
 
 import bp_tracker
 
-# Need to use specific files in each test, not an actual data file.
-# That will let us do the averages.
-infile = 'bp_numbers.txt'
-# We assume there is such a data file, the more entries the better.
-#non_existent_file = "ghostfile"  # our nonexistent file
-#empty_file = "empty"  # our empty file
-
-# Begin with two helper functions:
-
-to_test_ck4duplicate_tests = '''
-def increment_sums_by_values(sums, values):
-    """
-    Include this redundant declaration just to check 
-    that checking for duplicates actually works.
-    """
-    pass
-'''
-
-def increment_sums_by_values(sums, values):
-    """
-    <sums> is an iterable of running totals.
-    <values> is a same length iterable of values to be added to the
-    corresponding values in <sums>.
-    Note side effect on <sums>.
-    """
-    assert(len(sums) == len(values))
-    for n in range(len(values)):
-        sums[n] += values[n]
-
-# And add a helper class:
-
-class Collector(object):
-
-    def __init__(self, lines=[]):
-        self.lines = lines
-
-    def write(self, text):
-        self.lines.append(text)
-        
-
-# It is generally easier to put the data into the test.
-# Relying on an actual data file is fragile,
-# it changes data and location.
-# Try to keep the test as self-contained as possible. 
-def collect_averages(infile):
-    """
-    By collecting the same data in a different way we can
-    continue testing inspite of data changing constantly.
-    """
-    with open(infile, 'r') as stream:
-        denominator = 0
-        totals = [0, 0, 0]
-        for line in stream:
-            if line and not line.startswith('#') :
-                parts = [int(val) for val in line.split()[:3]]
-                increment_sums_by_values(totals, parts)
-                denominator += 1
-    return [total/denominator for total in totals]  
-
 
 class TestBpTracker(unittest.TestCase):
 
-    stream = [
-        "The quick brown fox",
-        "   jumped over the moon",
-        "    "
-        "# but of course this is rediculous!",
-        " # as is this.",
-        "        indented => unindented line",
-        ]
-
     def setUp(self):
         self.test_dir = tempfile.TemporaryDirectory()
+        self.good_file = os.path.join(self.test_dir.name, 'good_data.txt')
+        with open(self.good_file, 'w') as f:
+            f.write("# A comment, just to keep us honest.\n")
+            f.write("120 65 55 20220914.1407\n")
+            f.write("120 64 60 20220914.1753\n")
+            f.write("140 64 65 20220915.1408\n")
+            f.write("140 62 60 20220915.1714\n")
+        self.good_data = bp_tracker.array_from_file(self.good_file)
+
 
     def tearDown(self):
         self.test_dir.cleanup()
 
-    #def test_averaging(self):
-    def test_averaging_from_file_with_good_data(self):
-        # Using the below as a starting point,
-        # write two lines to the file.
-        # You can hard code the 'averages' and
-        # not need the methods above.
 
-#       test_file = os.path.join(self.test_dir.name,
-#                                'readable.file')
-#       with open(test_file, 'w') as f:
-#          f.write("howdy\n")
-#       self.assertTrue(bp_tracker.check_file(test_file, 'r'))
-
-        averages = collect_averages(infile)
-        averages = [round(avg) for avg in averages]
-        self.assertEqual(averages,
-                bp_tracker.averages(
-                    bp_tracker.array_from_file(infile))
-                )
-
-    def test_averaging_from_file_with_comments(self):
-        # Using the below as a starting point, write two good
-        # data lines and two comment lines to the file,
-        # You can hard code the 'averages' and
-        # not need the methods above.
-
-#       test_file = os.path.join(self.test_dir.name,
-#                                'readable.file')
-#       with open(test_file, 'w') as f:
-#          f.write("howdy\n")
-#       self.assertTrue(bp_tracker.check_file(test_file, 'r'))
-
-        averages = collect_averages(infile)
-        averages = [round(avg) for avg in averages]
-        self.assertEqual(averages,
-                bp_tracker.averages(
-                    bp_tracker.array_from_file(infile)))
-
-
-    def test_averaging_only_last_few(self):
-        for n in range(7):
-            averages = collect_averages(infile)[-7:]
-            averages = [round(avg) for avg in averages]
-            self.assertEqual(averages,
-                bp_tracker.averages(
-                    bp_tracker.array_from_file(infile)), n
-                )
+    def test_averaging(self):
+        self.assertTrue(bp_tracker.averages(self.good_data) == [130, 64, 60] )
 
 
     def test_check_file_readable_file(self):
-        test_file = os.path.join(self.test_dir.name,
-                                 'readable.file')
-        with open(test_file, 'w') as f:
-            f.write("howdy\n")
-        self.assertTrue(bp_tracker.check_file(test_file, 'r'))
-
+        self.assertTrue(bp_tracker.check_file(self.good_file, 'r'))
+ 
 
     def test_check_file_writeable_file(self):
-        test_file = os.path.join(self.test_dir.name, 'writeable.file')
-        with open(test_file, 'w') as f:
-          f.write("howdy\n")
-        self.assertTrue(bp_tracker.check_file(test_file, 'w'))
+        self.assertTrue(bp_tracker.check_file(self.good_file, 'w'))
 
 
     def test_check_file_writeable_dir(self):
-        test_dir_writeable = os.path.join(self.test_dir.name,
-                                          'writeable')
+        test_dir_writeable = os.path.join(self.test_dir.name, 'writeable')
         os.mkdir(test_dir_writeable)
         os.chmod(test_dir_writeable, 0o777)
-        test_file = os.path.join(test_dir_writeable,
-                                 'missing.file')
-        self.assertTrue(bp_tracker.check_file(test_file, 'w'))
+        test_file = os.path.join(test_dir_writeable, 'missing.file')
+        self.assertTrue(bp_tracker.check_file(self.test_dir.name, 'w'))
 
 
     def test_check_file_read_missing_file(self):
@@ -189,56 +77,17 @@ class TestBpTracker(unittest.TestCase):
         self.assertFalse(bp_tracker.check_file(test_file, 'w'))
 
 
-    def test_useful_lines(self):  # (stream, comment="#"):
-        expected = [
-        "The quick brown fox",
-        "jumped over the moon",
-        "# but of course this is rediculous!",
-        "# as is this.",
-        "indented => unindented line",
-            ]
-        self.assertEqual([line for line in
-                bp_tracker.useful_lines(self.stream,
-                                        comment='')],
-                expected)
-
-
-    def test_useful_lines_without_comments(self):
-        expected = [
-        "The quick brown fox",
-        "jumped over the moon",
-        "indented => unindented line",
-            ]
-        self.assertEqual([line for line in
-            bp_tracker.useful_lines(self.stream, comment='#')],
-            expected)
+    def test_useful_lines(self):
+        self.assertEqual( len(self.good_data), 4)
 
 
     def test_valid_data(self):
-        bad = []
-        lines_and_results = (
-            ("110 59 68 20220809.1640", (110,59,68,20220809.1640)),
-            ("124 62 62 20220810.0840", (124,62,62,20220810.0840)),
-            ("134 63 57 20220812.0758", (134,63,57,20220812.0758)),
-            ("134 62 57 20220812.1128", (134,62,57,20220812.1128)),
-            ("100 59 62 20220812.1323", (100,59,62,20220812.1323)),
-            ("total junk times four", None),
-            ("to few components", None),
-            ("to many all junk components", None),
-            ("23 14 sixty 4.5", None),
-            ("23 14 89 4.5 00", None),
-                )
-        for entry in lines_and_results:
-            self.assertEqual(bp_tracker.valid_data(entry[0],bad),
-                                entry[1])
-        errors = [parts[0] for parts in lines_and_results
-                    if parts[1] == None]
-        self.assertEqual(bad, errors)
-
+        data     = "120 65 55 20220914.1407"
+        result   = bp_tracker.valid_data(data)
+        expected = [120, 65, 55, '20220914.1407']
+        self.assertTrue( result == expected)
 
     def test_array_from_file(self):
-        # Write a test file with three lines of data,
-        # and test that the returned list has a len of 3.
         data = (
             "110 59 68 20220809.1640",
             "124 62 62 20220810.0840",
@@ -247,7 +96,7 @@ class TestBpTracker(unittest.TestCase):
             "100 59 62 20220812.1323",
                 )
         report_file = os.path.join(self.test_dir.name,
-                                    'bp-data.txt')
+                                    'test_write_data.txt')
         with open(report_file, 'w') as f:
             for line in data:
                 f.write(line + "\n")
@@ -312,6 +161,7 @@ class TestBpTracker(unittest.TestCase):
         self.assertTrue(second == [80, 90, 100])
         self.assertTrue(third  == [60, 70, 80])
 
+
     def test_dict_for_display(self):
         #!! Need to add test for following keys:
         #   s_cls, d_cls, n_data_points, calcs
@@ -330,7 +180,6 @@ class TestBpTracker(unittest.TestCase):
         self.assertTrue(result['pl'] == 60)
         self.assertTrue(result['ph'] == 80)
         self.assertTrue(result['pa'] == 70)
-
 
 
     def test_list_average(self):
@@ -421,42 +270,42 @@ class TestBpTracker(unittest.TestCase):
 
     def test_no_date_stamp(self):
         self.assertEqual(bp_tracker.no_date_stamp(
-            (115, 67, 66, 20220914.0839)), None)
-        self.assertEqual(bp_tracker.no_date_stamp(
-            (115, 67, 66, 0.0)), True)
+            (115, 67, 66, '0.0' )), None)
 
 
     def test_time_of_day_filter(self):
         self.assertEqual(bp_tracker.time_of_day_filter(
-            (115, 67, 66, 20220914.0839), 800, 900), True)
+            (115, 67, 66, '20220914.0800'), '0800', '0900'), True)
         self.assertEqual(bp_tracker.time_of_day_filter(
-            (115, 67, 66, 20220914.0839), 900, 1000), None)
+            (115, 67, 66, '20220914.0839'), '0800', '0900'), True)
         self.assertEqual(bp_tracker.time_of_day_filter(
-            (115, 67, 66, 0.0), 800, 900), None)
+            (115, 67, 66, '20220914.0839'), '0900', '1000'), None)
+        self.assertEqual(bp_tracker.time_of_day_filter(
+            (115, 67, 66, '0.0'), '0800', '0900'), None)
 
 
     def test_date_range_filter(self):
         self.assertEqual(bp_tracker.date_range_filter(
-            (115, 67, 66, 20220914.0839),
-            20220913.0800, 20220916.0900), True)
+            (115, 67, 66, '20220914.0839'),
+            '20220913.0800', '20220916.0900'), True)
         self.assertEqual(bp_tracker.time_of_day_filter(
-            (115, 67, 66, 20220914.0839),
-            20220910.0800, 20220913.0900), None)
+            (115, 67, 66, '20220914.0839'),
+            '20220910.0800', '20220913.0900'), None)
         self.assertEqual(bp_tracker.time_of_day_filter(
-            (115, 67, 66, 0.0),
-            20220910.0800, 20220913.0900), None)
+            (115, 67, 66, '0.0'),
+            '20220910.0800', '20220913.0900'), None)
 
 
     def test_not_before_filter(self):
         self.assertEqual(bp_tracker.not_before_filter(
-            (115, 67, 66, 20220914.0839),
-            20220913.0800), True)
+            (115, 67, 66, '20220914.0839'),
+            '20220913.0800'), True)
         self.assertEqual(bp_tracker.not_before_filter(
-            (115, 67, 66, 20220914.0839),
-            20220915.0800), None)
+            (115, 67, 66, '20220914.0839'),
+            '20220915.0800'), None)
         self.assertEqual(bp_tracker.not_before_filter(
-            (115, 67, 66, 0.0),
-            20220915.0800), None)
+            (115, 67, 66, '0.0'),
+            '20220915.0800'), None)
 
 
     def test_filter_data(self):
@@ -471,25 +320,12 @@ class TestBpTracker(unittest.TestCase):
         pass
 
 
-    def test_add_cmd(self):
+    def test_add(self):
         pass
 
 
-    def test_format_data_cmd(self):
+    def test_format_data(self):
         pass
-
-
-    def test_main(self):
-        pass
-
-
-redact = '''  # We should run the following once in awhile!
-class TestTestsAreRun(unittest.TestCase):
-    def test_testing(self):
-        print('In test_testing: about to fail!')
-        self.assertEqual(1, 2)
-'''
-    
 
 if __name__ == '__main__':
     unittest.main()

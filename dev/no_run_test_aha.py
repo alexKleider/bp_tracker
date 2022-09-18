@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 # File: test_aha.py
+## Renamed this so it would not get picked up in unittest.
 
 import os
 try:
