@@ -232,10 +232,6 @@ class TestBpTracker(unittest.TestCase):
                     "180 s 9", "110 d 9", "210 s 9", "120 d 9",
                     "211 s 10", "121 d 10",
                                     )]):
-#           print("{} {} {} yields {}"
-#               .format(data[0], data[1], data[2],
-#               category.get_category(data[0], data[1])
-#                   ))
             self.assertEqual(
                 bp_tracker.get_category(data[0], data[1]),
                 bp_tracker.categories[int(data[2])])
@@ -307,6 +303,30 @@ class TestBpTracker(unittest.TestCase):
             (115, 67, 66, '0.0'),
             '20220915.0800'), None)
 
+
+    def test_get_label(self):
+        # Test at lower boundry
+        self.assertTrue( bp_tracker.get_label(70, bp_tracker.systolics) == 'low')
+        self.assertTrue( bp_tracker.get_label(56, bp_tracker.diastolics) == 'low')
+
+        # Test at upper boundry
+        self.assertTrue( bp_tracker.get_label(179, bp_tracker.systolics) == 'high: stage 2')
+        self.assertTrue( bp_tracker.get_label(119, bp_tracker.diastolics) == 'high: stage 2')
+
+        # Test out of bounds
+        self.assertTrue( bp_tracker.get_label(-1, bp_tracker.systolics) == None)
+        self.assertTrue( bp_tracker.get_label(301, bp_tracker.diastolics) == None)
+
+    def test_report_format(self):
+        expected = [
+            "Systolic 165 (high: stage 2) ",
+            "Diastolic 89 (high: stage 1) ",
+            "Average 160/88 ",
+        ]
+        result = bp_tracker.report_format_3.split("\n")
+        self.assertTrue(result[0] == expected[0])
+        self.assertTrue(result[1] == expected[1])
+        self.assertTrue(result[2] == expected[2])
 
     def test_filter_data(self):
         pass

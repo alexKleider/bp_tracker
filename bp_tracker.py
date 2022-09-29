@@ -22,6 +22,30 @@ from datetime import datetime
 
 data_file = "bp_numbers.txt"
 
+systolics = (
+    (0, 0, "dead"),
+    (1, 49, "low: medication required"),
+    (50, 69, "low: at risk"),
+    (70, 85, "low"),
+    (86, 120, "good"),
+    (121, 129, "elevated"),
+    (130, 139, "high: stage 1"),
+    (140, 179, "high: stage 2"),
+    (180, 300, "high: crisis"),
+)
+
+diastolics = (
+    (0, 0, "dead"),
+    (1, 45, "low: medication required"),
+    (46, 55, "low: at risk"),
+    (56, 65, "low"),
+    (66, 79, "good"),
+    (80, 89, "high: stage 1"),
+    (90, 119, "high: stage 2"),
+    (120, 300, "high: crisis"),
+)
+
+
 report_format = """
            |  Low | High | Avg  | Classification |
            |  --- | ---- | ---  | -------------- |
@@ -36,6 +60,7 @@ report_format_2 = "          | Low  | High | Avg  |\n"
 report_format_2 += "Systolic  |{:^6}|{:^6}|{:^6}|\n"
 report_format_2 += "Diastolic |{:^6}|{:^6}|{:^6}|\n"
 report_format_2 += "Pulse     |{:^6}|{:^6}|{:^6}|\n"
+
 
 invalid_lines = []  # still to decide: -v or -i --invalid option?
 # option might collect a file name into which to dump invalid_lines
@@ -56,6 +81,19 @@ def check_file(file, mode):
         ):
             return True
     return False
+
+
+def get_label(num, scale):
+    """
+    Takes a number and a tuple of (min, max, lable) tuples,
+    returns the label for the range the number falls into.
+    """
+    for group in scale:
+        lower, upper, label = group
+        if num in range(lower, upper + 1):
+            # The 'upper + 1' is required because range doesn't include upper
+            return label
+    return None
 
 
 def useful_lines(stream, comment="#"):
@@ -543,17 +581,18 @@ def format_data(data):
     print(report_format.format(**display_dict))
 
 
+report_format_3 = "Systolic {} ({}) \n".format(165, get_label(165, systolics))
+report_format_3 += "Diastolic {} ({}) \n".format(89, get_label(89, diastolics))
+report_format_3 += "Average {}/{} \n".format(160, 88)
+
 if __name__ == "__main__":
     args = get_args()
 
     set_data_file(args)
 
-    # User either wishes to Add a reading ...
     if args.add:
         add(args)
         sys.exit(0)
 
-    # ... or Analyse data: so we need to
-    # collect it and apply the filters ...
     data = filter_data(array_from_file(data_file, invalid_lines), args)
     format_data(data)
