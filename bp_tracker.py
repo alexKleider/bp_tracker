@@ -51,6 +51,8 @@ diastolic_labels = (
 invalid_lines = []  # still to decide: -v or -i --invalid option?
 # option might collect a file name into which to dump invalid_lines
 
+class NoValidData(ValueError):
+    pass
 
 def add(args):
     # This format allows sequencing now and parsing later.
@@ -96,9 +98,7 @@ def check_file(file, mode):
     if mode == "w":
         if os.access(file, os.W_OK):
             return True
-        if not os.path.exists(file) and os.access(
-            os.path.dirname(file), os.W_OK
-        ):
+        if not os.path.exists(file) and os.access(os.path.dirname(file), os.W_OK):
             return True
     return False
 
@@ -124,13 +124,9 @@ def filter_data(data, args):
     ret = []
     ok = True
     for item in data:
-        if args.times and not time_of_day_filter(
-            item, args.times[0], args.times[1]
-        ):
+        if args.times and not time_of_day_filter(item, args.times[0], args.times[1]):
             continue
-        if args.range and not date_range_filter(
-            item, args.range[0], args.range[1]
-        ):
+        if args.range and not date_range_filter(item, args.range[0], args.range[1]):
             continue
         if args.date and not not_before_filter(item, args.date[0]):
             continue
@@ -138,12 +134,11 @@ def filter_data(data, args):
     if args.number:
         n = args.number[0]
         l = len(ret)
-        if l == 0:
-            print("No readings to report!")
-            sys.exit()
         if (n > l) or (n < 1):
             n = l
         ret = ret[-n:]
+    if len(ret) == 0:
+        raise NoValidData("No data to report on")
     return ret
 
 
@@ -160,9 +155,7 @@ def format_report(systolics, diastolics):
     result += "Diastolic {} ({}) \n".format(
         diastolic, get_label(diastolic, diastolic_labels)
     )
-    result += "Average {}/{} \n".format(
-        average(systolics), average(diastolics)
-    )
+    result += "Average {}/{} \n".format(average(systolics), average(diastolics))
     return result
 
 
@@ -281,7 +274,7 @@ def useful_lines(stream, comment="#"):
 def valid_data(line, invalid_lines=None):
     """
     Accepts what is assumed to be a valid line.
-    If valid, returns a 4 tuple (int, int, int, float).
+    If valid, returns a list of int, int, int, string.
     If not valid and if <invalid_lines> is not None,
     assumes errors is a list to which the invalid line is added.
     """
@@ -290,7 +283,6 @@ def valid_data(line, invalid_lines=None):
         try:
             for i in range(3):
                 data[i] = int(data[i])
-            # Changed from float, since float removed trailing 0's.
             data[3] = str(data[3])
         except ValueError:
             if invalid_lines != None:
@@ -309,7 +301,14 @@ if __name__ == "__main__":
     if args.add:
         add(args)
 
-    data = filter_data(array_from_file(data_file, invalid_lines), args)
+    try:
+        data = filter_data(array_from_file(args.file, invalid_lines), args)
+    except FileNotFoundError:
+        print("Unable to find {}, exiting.".format(args.file))
+        sys.exit(1)
+    except NoValidData:
+        print("No viable data in {}, exiting.".format(args.file))
+        sys.exit(1)
 
     for element in data:
         sys_list = list_from_index(data, 0)
