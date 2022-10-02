@@ -234,14 +234,19 @@ class TestBpTracker(unittest.TestCase):
     def test_format_data(self):
         pass
 
-    def test_get_latest(self):
+    def test_sort_by_index(self):
         data = [
-            [100, 80, 60],
-            [110, 90, 70],
-            [120, 100, 80],
+            [168, 87, 76, "20221001.1227"],
+            [189, 94, 71, "20220924.1243"],
+            [176, 92, 76, "0.0"],
+            [168, 87, 76, "20221001.1228"],
+            [162, 94, 78, "20220927.1632"],
+            [160, 93, 70, "20220926.0743"],
+            [163, 90, 64, "20220922.0740"],
         ]
-        expected = [120, 100, 80]
-        self.assertTrue(bp_tracker.get_latest(data) == expected)
+        expected = [168, 87, 76, "20221001.1228"]
+        result = bp_tracker.sort_by_index(data, -1)
+        self.assertTrue(result[-1] == expected)
 
 
 if __name__ == "__main__":

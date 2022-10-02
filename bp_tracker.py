@@ -14,13 +14,12 @@
 #   Report based on time of day (early, midmorning, afternoon, evening)
 #   (?) Add current distance from goal?
 #   Add more tests.
-#   Sort the values by date, dropping off any 0.0 dates.
-#    - So that get_latest doesn't just pick off the last element.
 
-import os
-import sys
 import argparse
 from datetime import datetime
+from operator import itemgetter
+import os
+import sys
 
 data_file = "bp_numbers.txt"
 
@@ -51,8 +50,10 @@ diastolic_labels = (
 invalid_lines = []  # still to decide: -v or -i --invalid option?
 # option might collect a file name into which to dump invalid_lines
 
+
 class NoValidData(ValueError):
     pass
+
 
 def add(args):
     # This format allows sequencing now and parsing later.
@@ -98,7 +99,9 @@ def check_file(file, mode):
     if mode == "w":
         if os.access(file, os.W_OK):
             return True
-        if not os.path.exists(file) and os.access(os.path.dirname(file), os.W_OK):
+        if not os.path.exists(file) and os.access(
+            os.path.dirname(file), os.W_OK
+        ):
             return True
     return False
 
@@ -124,9 +127,13 @@ def filter_data(data, args):
     ret = []
     ok = True
     for item in data:
-        if args.times and not time_of_day_filter(item, args.times[0], args.times[1]):
+        if args.times and not time_of_day_filter(
+            item, args.times[0], args.times[1]
+        ):
             continue
-        if args.range and not date_range_filter(item, args.range[0], args.range[1]):
+        if args.range and not date_range_filter(
+            item, args.range[0], args.range[1]
+        ):
             continue
         if args.date and not not_before_filter(item, args.date[0]):
             continue
@@ -147,15 +154,17 @@ def format_report(systolics, diastolics):
     Takes the numeric lists of systolics, diastolics, and pulses, and
     return a string for printing.
     """
-    systolic = get_latest(systolics)
-    diastolic = get_latest(diastolics)
+    systolic = get_last(systolics)
+    diastolic = get_last(diastolics)
     result = "Systolic {} ({}) \n".format(
         systolic, get_label(systolic, systolic_labels)
     )
     result += "Diastolic {} ({}) \n".format(
         diastolic, get_label(diastolic, diastolic_labels)
     )
-    result += "Average {}/{} \n".format(average(systolics), average(diastolics))
+    result += "Average {}/{} \n".format(
+        average(systolics), average(diastolics)
+    )
     return result
 
 
@@ -218,10 +227,9 @@ def get_label(num, scale):
     return None
 
 
-def get_latest(list_):
-    """Returns the latest element in a list, based on timestamp."""
-    # TODO: Work on timestamp, and not last element.
-    return list_[-1]
+def get_last(val):
+    """Returns last element of a list."""
+    return val[-1]
 
 
 def list_from_index(data, index):
@@ -243,6 +251,12 @@ def not_before_filter(data, date):
     day = data[3].split(".")[0]
     if day >= date:
         return True
+
+
+def sort_by_index(data, index):
+    """Sorts lists of lists by specified index in sub-lists."""
+    get_on_index = itemgetter(index)
+    return sorted(data, key=get_on_index)
 
 
 def time_of_day_filter(datum, begin, end):
@@ -303,6 +317,7 @@ if __name__ == "__main__":
 
     try:
         data = filter_data(array_from_file(args.file, invalid_lines), args)
+        data = sort_by_index(data, -1)
     except FileNotFoundError:
         print("Unable to find {}, exiting.".format(args.file))
         sys.exit(1)
