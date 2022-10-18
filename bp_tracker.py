@@ -47,9 +47,6 @@ diastolic_labels = (
 )
 
 
-invalid_lines = []  # still to decide: -v or -i --invalid option?
-# option might collect a file name into which to dump invalid_lines
-
 
 class NoValidData(ValueError):
     pass
@@ -174,42 +171,48 @@ def get_args():
     parser.add_argument(
         "-f",
         "--file",
-        help="Report FILE (default bp_numbers.txt)",
+        help="report FILE (default bp_numbers.txt)",
         default=data_file,
     )
     parser.add_argument(
         "-a",
         "--add",
         nargs=3,
-        help="Add in the order of systolic, diastolic, pulse",
+        help="add in the order of systolic, diastolic, pulse",
     )
     parser.add_argument(
         "-t",
         "--times",
         nargs=2,
         type=int,
-        help="Only consider readings within TIMES span",
+        help="only consider readings within TIMES span",
     )
     parser.add_argument(
         "-r",
         "--range",
         nargs=2,
         type=int,
-        help="Only consider readings taken within date RANGE.",
+        help="only consider readings taken within date RANGE",
     )
     parser.add_argument(
         "-d",
         "--date",
         nargs=1,
         type=int,
-        help="Ignore readings prior to DATE",
+        help="ignore readings prior to DATE",
     )
     parser.add_argument(
         "-n",
         "--number",
         nargs=1,
         type=int,
-        help="Only consider the last NUMBER valid readings",
+        help="only consider the last NUMBER valid readings",
+    )
+    parser.add_argument(
+        "-e",
+        "--error",
+        help="send invalid data lines to stdout",
+        action="store_true",
     )
     return parser.parse_args()
 
@@ -315,8 +318,14 @@ if __name__ == "__main__":
     if args.add:
         add(args)
 
+    if args.error:
+        invalid_lines = []
+    else:
+        invalid_lines = None
+
     try:
-        data = filter_data(array_from_file(args.file, invalid_lines), args)
+        data = filter_data(array_from_file(
+            args.file, invalid_lines), args)
         data = sort_by_index(data, -1)
     except FileNotFoundError:
         print("Unable to find {}, exiting.".format(args.file))
@@ -330,3 +339,9 @@ if __name__ == "__main__":
         dia_list = list_from_index(data, 1)
 
     print(format_report(sys_list, dia_list))
+    if invalid_lines:
+        print("The following invalid lines were found:")
+        for line in invalid_lines:
+            print('\t' + line)
+    elif args.error:
+        print("No invalid lines found.")
