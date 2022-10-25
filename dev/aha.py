@@ -30,7 +30,7 @@ import sys
 # (individual single number) blood pressure readings:
 # s == systolic values; d == diastolic values
 # Note: these do _not_ correspond with the 'unified' system.
-s =  (50, 70, 90, 100, 121, 130, 140, 160, 180, 211, )
+s = (50, 70, 90, 100, 121, 130, 140, 160, 180, 211, )
 d = (35, 40, 60,  65,  81,  85,  90, 100, 110, 121, )
 categories = ('Extreme hypotension',        # 0
               'Severe hypotension',         # 1
@@ -142,6 +142,53 @@ if __name__ == '__main__':   # calculator
         both = matches + mismatches
         for res in both:
             print(res)
+
+
+systolic_edges = (
+        ( 49, categories[ 0]),
+        ( 50, categories[ 1]),
+        ( 69, categories[ 1]),
+        ( 70, categories[ 2]),
+        ( 89, categories[ 2]),
+        ( 90, categories[ 3]),
+        ( 99, categories[ 3]),
+        (100, categories[ 4]),
+        (120, categories[ 4]),
+        (121, categories[ 5]),
+        (129, categories[ 5]),
+        (130, categories[ 6]),
+        (139, categories[ 6]),
+        (140, categories[ 7]),
+        (159, categories[ 7]),
+        (160, categories[ 8]),
+        (179, categories[ 8]),
+        (180, categories[ 9]),
+        (210, categories[ 9]),
+        (211, categories[10]),
+        )
+
+diastolic_edges = (
+        ( 34, categories[ 0]),
+        ( 35, categories[ 1]),
+        ( 39, categories[ 1]),
+        ( 40, categories[ 2]),
+        ( 59, categories[ 2]),
+        ( 60, categories[ 3]),
+        ( 64, categories[ 3]),
+        ( 64, categories[ 4]),
+        ( 80, categories[ 4]),
+        ( 81, categories[ 5]),
+        ( 84, categories[ 5]),
+        ( 85, categories[ 6]),
+        ( 89, categories[ 6]),
+        ( 90, categories[ 7]),
+        ( 99, categories[ 7]),
+        (100, categories[ 8]),
+        (109, categories[ 8]),
+        (110, categories[ 9]),
+        (120, categories[ 9]),
+        (121, categories[10]),
+        )
 
 
     readings = (  # a subset of my readings

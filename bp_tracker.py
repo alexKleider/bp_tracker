@@ -47,7 +47,6 @@ diastolic_labels = (
 )
 
 
-
 class NoValidData(ValueError):
     pass
 
@@ -63,6 +62,30 @@ def add(args):
     else:
         print("Unable to write to", args.file)
         sys.exit(1)
+
+
+def valid_data(line, invalid_lines=None):
+    """
+    Accepts what is assumed to be a valid line.
+    If valid, returns a list of int, int, int, string.
+    If not valid and if <invalid_lines> is not None,
+    assumes errors is a list to which the invalid line is added.
+    """
+    data = line.split()
+    if len(data) == 4:
+        try:
+            for i in range(3):
+                data[i] = int(data[i])
+            data[3] = str(data[3])
+        except ValueError:
+            if invalid_lines != None:
+                invalid_lines.append(line)
+            return
+    else:
+        if invalid_lines != None:
+            invalid_lines.append(line)
+        return
+    return data
 
 
 def array_from_file(report_file, invalid_lines=None):
@@ -288,35 +311,12 @@ def useful_lines(stream, comment="#"):
             yield line
 
 
-def valid_data(line, invalid_lines=None):
-    """
-    Accepts what is assumed to be a valid line.
-    If valid, returns a list of int, int, int, string.
-    If not valid and if <invalid_lines> is not None,
-    assumes errors is a list to which the invalid line is added.
-    """
-    data = line.split()
-    if len(data) == 4:
-        try:
-            for i in range(3):
-                data[i] = int(data[i])
-            data[3] = str(data[3])
-        except ValueError:
-            if invalid_lines != None:
-                invalid_lines.append(line)
-            return
-    else:
-        if invalid_lines != None:
-            invalid_lines.append(line)
-        return
-    return data
-
-
 if __name__ == "__main__":
     args = get_args()
 
     if args.add:
         add(args)
+        sys.exit()
 
     if args.error:
         invalid_lines = []
@@ -324,8 +324,7 @@ if __name__ == "__main__":
         invalid_lines = None
 
     try:
-        data = filter_data(array_from_file(
-            args.file, invalid_lines), args)
+        data = filter_data(array_from_file(args.file, invalid_lines), args)
         data = sort_by_index(data, -1)
     except FileNotFoundError:
         print("Unable to find {}, exiting.".format(args.file))
@@ -342,6 +341,6 @@ if __name__ == "__main__":
     if invalid_lines:
         print("The following invalid lines were found:")
         for line in invalid_lines:
-            print('\t' + line)
+            print("\t" + line)
     elif args.error:
         print("No invalid lines found.")

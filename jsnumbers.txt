@@ -1,0 +1,3 @@
+# sys dia pulse time_stamp for June 
+119 63 63 20221024.1509
+136 53 64 20221024.1742
