@@ -249,5 +249,12 @@ class TestBpTracker(unittest.TestCase):
         self.assertTrue(result[-1] == expected)
 
 
+class TestTesting(unittest.TestCase):
+    """
+    Check that tests are indeed being run!
+    """
+    def test_testing(self):
+        self.assertTrue(False)
+
 if __name__ == "__main__":
     unittest.main()

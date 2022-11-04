@@ -3,7 +3,13 @@
 # File: aha.py  (for American Heart Association)
 
 """
-An amalgamation of what used to be category.py and calculate.py.
+Blood Pressure consists of sys/dia. i.e. two numbers.
+There are criteria for determining the BP Category of a single 
+systolic or diastolic reading
+and criteria for determining BP Category based on a sys/dia reading.
+One can also calculate a mean arterial pressure (MAP) and get a
+classification based on that.
+
 
 The "Category" section deals with individual (systolic or diastolic)
 values and assigns the appropriate AHA classification.
@@ -191,7 +197,7 @@ diastolic_edges = (
         )
 
 
-    readings = (  # a subset of my readings
+readings = (  # a subset of my readings
         (145, 67),# used for testing
         (123, 64),
         (124, 56),
