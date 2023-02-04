@@ -1,0 +1,180 @@
+"git push origin --set-upstream <name of your branch>".
+if need to delete:
+   git push origin --delete issue_011-temp
+Let's say you make a branch, "issue_123".
+
+- On your machine, in the bp_tracker directory.
+	git pull
+	git checkout -b issue_123     # Note the "-b" to create the branch
+        above does both of the following:
+            git branch issue123
+            git checkout issue123
+	<edit files>
+	<run tests>
+	git add .
+	git commit -m "<Commit message>"
+	git push origin --set-upstream issue_123
+
+Then you let me know, and I:
+	git pull
+	git checkout issue_123     # Note the lack of "-b"
+	<inspect code>
+	<let you know if there are issues>
+
+Normally, if your code was good then I'd merge it. Since this is a
+learning exercise, I'll send you a note to merge it. You:
+	git master
+	git merge issue_123
+- - <if there are merge conflicts, send me the list, However, we
+shouldn't see too many, if any>
+	git push
+	git branch -d issue_123			# Delete branch locally
+	git push origin --delete issue_123	# Delete branch on GitHub
+    git push origin --delete <branch_name>
+
+============================================================
+On the merge, it's pretty easy after you do it once.
+
+  checkout the master branch
+     git checkout master
+  merge the other branch
+     git merge issue_004b
+  Push the updated master to github
+     git push
+  clean up the old branches:
+     git branch -d issue_004b
+     git push origin --delete issue_004b
+
+After that, probably create an issue on github to clean up the comments, and then a branch for the work. Make sure the tests pass once you're done, and then let me know. I'll pull the updates and make sure the tests still run. Assuming they do, then one of us merges into master and pushes.
+
+Make sense?
+====================================================
+
+ Sometimes Python can be clearly written with less code.
+   a. If you have DEFAULT_REPORT_FILE, and report_file, you're
+doubling your effort. That's why I set report_file early and then
+change it. Only one variable to deal with.
+   b. An empty list has a length of 0, which Python evaluates to
+False. Consider the following code:
+
+	def valid_line(line):
+	  valid = True
+	  # bunch of tests to ensure the line contains valid data
+	  # Failing any test sets "valid" to False
+	  return valid
+
+	and:
+
+	def build_list_from_file(file):
+	  data = []
+	  with open(file, 'r') as f:
+	    for line in f:
+	      if valid_line(line):
+	        data.append(line.strip())
+	  return data
+
+	so that:
+
+	data = build_list_from_file(report_file)
+	if len(data):
+	  # do stuff with each data line
+	else:
+	  print("No valid data in {}".format(data_file))
+	  sys.exit(1)
+
+3. Breaking up the program to make it more testable is one of the best
+benefits of Test Driven Development. I find much greater clarity of
+thought and code when I use TDD. As you saw, this code started without
+it. Now is a good time to fix that, though.
+==================================================
+note4leam:
+Within array_from_file:
+        # the following print statements are the closest we come to a
+        # test of this function. Should we check that tuple members
+        # are string representations of int, int, int, float?
+        # i.e. should we add a check_line_validity function?
+======================================================
+Here are some Behavior Driven Development (BDD) style statements. They are in a "Given, When, Then" format, and should answer most of the above.
+
+  1. Given a missing or empty file and the user can write to that file/directory, When run with the "add" option, Then the program will write the data to the file.
+  2. Given a file/directory the user cannot write to, When run with the "add" option, Then the program reports the error and exits.
+  3. Given a writeable file with non-valid data, When run with the "add" option, Then the program appends the data.
+  4. Given a readable file with no valid data, When run to report, Then the program notifies that there is no valid data.
+  5. Given a readable file with at least some valid data, When run to report, Then the program provides the report.
+
+On these:
+  #? Should we check for 'true' validity as in..
+  #? contains only valid data lines.
+  #? currently invalid lines will be caught during data analysis
+  #? but addition of valid data to an invalid file is permitted.
+
+Perhaps refactor out the check_validity_of_data_file method? Given the BDD statements, there are a few things to process:
+   If given the "add" option, can the program write to the directory or file? Error and exit if not.
+   If given the report option, is there any valid reportable data?
+     If yes, report on what's valid.
+     If no, Error and exit out.
+
+
+You can use the os.access method to check writeability and readability.
+   >>> os.access('/var/tmp/', os.W_OK)
+   True
+   >>> os.access('/usr', os.W_OK)
+   False
+   >>> os.access('/var/tmp/fred', os.R_OK)
+   True
+
+The size of the file doesn't really matter, maybe the user added comments to remind themselves about the format? Remember, Python is an object oriented language, and you can use that to your benefit. If the "data" object has valid data, then you process it. You don't need a "validity" variable, you ask the object if it has anything valid to process.
+
+There is a level of "if the user borks the file, then that's on them". Hopefully they have backups.  :)
+
+On the reporting layout, not bad. There are two style changes I'd suggest.
+
+1. "Less is more." Mostly a unix-ism, just report what is needed.
+2. "Where am I now, How have I been, and Where should I be?" are the priority questions.
+
+With those two in mind, I'd recommend changing:
+
+###
+Reassigned data file to '/home/leam/bin/data/bp_numbers.txt'.
+
+Lows, Highs & Averages:
+=======================
+            | Low  | High | Avg  |
+            | ---  | ---  | ---- |
+Systolic ..| 143  | 189  | 164  |
+Diastolic .|  67  | 101  |  85  |
+Pulse .....|  58  |  88  |  70  |
+###
+
+To
+###
+            | Now  | Avg  | Goal |
+Systolic   | 153  | 164  | 140  |
+Diastolic  |  87  |  85  |  80  |
+Pulse      |  58  |  70  |  60  |
+###
+
+That removes the Reassigned; the user typed it in so they probably know it.
+It removes the title line and "==", the "---", and the spacing "..".
+It changes the columns to Now, Avg, and Goal.
+Might even want to remove the "|", once we have the format down.
+
++++++++++===================================
+https://healthiack.com/wp-content/uploads/blood-pressure-chart-80.jpg
+============================================
+
+
+(totally bogus numbers and labels, just showing possible layout)
+
+		Current	   State	Goal	Average	   State
+systolic	  151   Hypertension	139 	  156	 Hypertension
+diastolic	   79	Normal		--	   85	 Pre-hypertension
+
+
+======================================================================
+What do you think of just going with the -e/--error as a flag
+to "report erroneous lines"?
+You could use a regular expression in "array_from_file", and
+populate invalid_lines[] from there.
+If the -e flag is used, then print each line after the regular report.
+======================================================================

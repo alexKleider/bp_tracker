@@ -3,6 +3,11 @@
 # File: aha/bpc.py
 
 """
+Still a work in progress; using classes to separate
+inified classification (one result for each sys/dia reading)
+from classification of systolic and diastolic values separately.
+
+
 https://www.heart.org/en/health-topics/high-blood-pressure/understanding-blood-pressure-readings
     Blood preasure categories:
     /--------------------------------------------\
