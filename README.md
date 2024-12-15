@@ -1,7 +1,7 @@
-# bp_tracker
+i# bp_tracker
 
 Tool to track and evaluate blood pressure recordings.
-
+(When collaborating with Leam Hall.)
 
 usage: bp_tracker.py [-h] [-a ADD ADD ADD] [-f FILE]
 
